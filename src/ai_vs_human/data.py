@@ -1,11 +1,12 @@
 from pathlib import Path
 from typing import Optional, Callable, Tuple, List, Dict
-import argparse
 import random
+import typer
 from PIL import Image
 import torch
 from torch.utils.data import Dataset
 import numpy as np
+import shutil
 
 
 class MyDataset(Dataset):
@@ -97,9 +98,9 @@ def preprocess_and_save(
     train_split: float = 0.8,
     seed: int = 42,
 ) -> Dict[str, Path]:
-    """Preprocess images stored in `raw_dir/ai` and `raw_dir/human`.
+    """Preprocess images stored in `raw/ai` and `raw/human`.
 
-    Saves tensors to `processed_dir`.
+    Saves tensors to `processed`.
     """
     raw_dir = Path(raw_dir)
     processed_dir = Path(processed_dir)
@@ -110,7 +111,9 @@ def preprocess_and_save(
     for c in expected:
         d = raw_dir / c
         if not d.exists() or not d.is_dir():
-            raise ValueError(f"Expected class folder '{c}' in {raw_dir}. Please create {raw_dir / 'ai'} and {raw_dir / 'human'} and populate with images.")
+            raise ValueError(
+                f"Expected class folder '{c}' in {raw_dir}. Please create {raw_dir / 'ai'} and {raw_dir / 'human'} and populate with images."
+            )
         classes.append(c)
 
     class_to_idx = {c: i for i, c in enumerate(classes)}
@@ -132,7 +135,7 @@ def preprocess_and_save(
     if not images:
         raise ValueError(f"No images found under {raw_dir}")
 
-    images_tensor = torch.stack(images)  # (N, 3, H, W)
+    images_tensor = torch.stack(images)
     images_tensor = images_tensor.float()
     images_tensor = torch.clamp(images_tensor, 0.0, 1.0)
     targets_tensor = torch.tensor(labels, dtype=torch.long)
@@ -176,27 +179,127 @@ def preprocess_and_save(
     }
 
 
-def prepare_from_cli() -> None:
-    parser = argparse.ArgumentParser(description="Preprocess raw image dataset into torch tensors")
-    parser.add_argument("--raw-dir", default="data/raw", help="Raw data directory containing 'ai' and 'human' subfolders")
-    parser.add_argument("--processed-dir", default="data/processed", help="Where to write processed tensors")
-    parser.add_argument("--image-size", type=int, default=224, help="Size (H and W) to resize images to")
-    parser.add_argument("--train-split", type=float, default=0.8, help="Fraction of data to use for training")
-    parser.add_argument("--seed", type=int, default=42, help="Shuffle seed")
-    args = parser.parse_args()
+def download_data(raw_dir: Path) -> Path:
+    """Download the Kaggle dataset and populate ``raw_dir``.
 
-    raw_dir = Path(args.raw_dir)
+    Downloads "hassnainzaidi/ai-art-vs-human-art" using kagglehub, then attempts
+    to copy image files into ``raw_dir/ai`` and ``raw_dir/human`` based on folder
+    names found in the dataset path.
+
+    Args:
+        raw_dir: Destination raw data directory. Subfolders ``ai`` and ``human``
+            will be created if missing.
+
+    Returns:
+        Path to the downloaded Kaggle dataset root.
+
+    Raises:
+        RuntimeError: If kagglehub is not available or no images could be
+            classified into expected folders.
+    """
+    try:
+        import kagglehub  # type: ignore
+    except Exception as exc:  # pragma: no cover
+        raise RuntimeError(
+            "kagglehub is required to download the dataset. Install it with 'uv add kagglehub'."
+        ) from exc
+
+    print("Downloading dataset from Kaggle (hassnainzaidi/ai-art-vs-human-art)...")
+    dataset_path_str = kagglehub.dataset_download("hassnainzaidi/ai-art-vs-human-art")
+    dataset_path = Path(dataset_path_str)
+    print(f"Path to dataset files: {dataset_path}")
+
+    ai_dir = raw_dir / "ai"
+    human_dir = raw_dir / "human"
+    ai_dir.mkdir(parents=True, exist_ok=True)
+    human_dir.mkdir(parents=True, exist_ok=True)
+
+    # Explicit mapping for this dataset
+    ai_source = dataset_path / "Art" / "AiArtData"
+    human_source = dataset_path / "Art" / "RealArt"
+
+    def _copy_from(src: Path, dst: Path) -> int:
+        n = 0
+        if not src.exists():
+            return 0
+        for p in src.rglob("*"):
+            if p.is_file() and _is_image_file(p):
+                shutil.copy2(p, dst / p.name)
+                n += 1
+        return n
+
+    copied_ai = 0
+    copied_human = 0
+
+    if ai_source.exists() or human_source.exists():
+        copied_ai += _copy_from(ai_source, ai_dir)
+        copied_human += _copy_from(human_source, human_dir)
+    else:
+        # Fallback heuristic if expected folders are missing
+        def _infer_label_from_path(p: Path) -> Optional[str]:
+            try:
+                rel = p.relative_to(dataset_path)
+            except Exception:
+                return None
+            dir_parts = [s.lower() for s in rel.parts[:-1]]
+            if any("realart" in s or "human" in s for s in dir_parts):
+                return "human"
+            if any("aiartdata" in s or "ai" in s or "generated" in s for s in dir_parts):
+                return "ai"
+            return None
+
+        for p in dataset_path.rglob("*"):
+            if p.is_file() and _is_image_file(p):
+                label = _infer_label_from_path(p)
+                if label == "ai":
+                    shutil.copy2(p, ai_dir / p.name)
+                    copied_ai += 1
+                elif label == "human":
+                    shutil.copy2(p, human_dir / p.name)
+                    copied_human += 1
+
+    if copied_ai == 0 and copied_human == 0:
+        raise RuntimeError(
+            f"No images copied from {dataset_path}. Please inspect dataset structure and adjust labeling mapping."
+        )
+
+    print(f"Copied {copied_ai} AI images and {copied_human} Human images to {raw_dir}.")
+    return dataset_path
+
+
+def prepare_data(
+    raw_dir: Path = typer.Option(Path("data/raw"), help="Raw data directory containing 'ai' and 'human' subfolders"),
+    processed_dir: Path = typer.Option(Path("data/processed"), help="Where to write processed tensors"),
+    image_size: int = typer.Option(224, help="Size (H and W) to resize images to"),
+    train_split: float = typer.Option(0.8, help="Fraction of data to use for training"),
+    seed: int = typer.Option(42, help="Shuffle seed"),
+) -> None:
+    """Preprocess raw image dataset into torch tensors."""
+
+    # check if raw dir exists
     if not raw_dir.exists():
-        raise RuntimeError(f"Raw directory {raw_dir} not found. Please create it with 'ai' and 'human' subfolders and add images.")
+        print(f"Raw directory {raw_dir} not found — creating and downloading Kaggle dataset...")
+        raw_dir.mkdir(parents=True, exist_ok=True)
+        download_data(raw_dir)
 
+    # check if subfolders exist and are non-empty
+    ai_dir = raw_dir / "ai"
+    human_dir = raw_dir / "human"
+    ai_missing = not ai_dir.exists() or not any(ai_dir.iterdir())
+    human_missing = not human_dir.exists() or not any(human_dir.iterdir())
+    if ai_missing or human_missing:
+        print("Raw folders missing or empty — attempting Kaggle download...")
+        download_data(raw_dir)
+
+    # preprocess and save data
+    print(f"Preprocessing and saving images to: {processed_dir}")
     preprocess_and_save(
-        raw_dir=args.raw_dir,
-        processed_dir=args.processed_dir,
-        image_size=args.image_size,
-        train_split=args.train_split,
-        seed=args.seed,
+        raw_dir=raw_dir,
+        processed_dir=processed_dir,
+        image_size=image_size,
+        train_split=train_split,
+        seed=seed,
     )
 
-
 if __name__ == "__main__":
-    prepare_from_cli()
+    typer.run(prepare_data)

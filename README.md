@@ -13,7 +13,7 @@ https://www.kaggle.com/datasets/hassnainzaidi/ai-art-vs-human-art
 
 The metadata is:
 - Paintings, photography and AI generated
-- 975 files
+- 970 images; 536 AI images and 434 Human images
 - Formats: .jpg, .png and .jpeg
 - 503.78 MB (Version 1)
 
