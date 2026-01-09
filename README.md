@@ -1,6 +1,25 @@
 # ai_vs_human
 
-detect if images are AI generated
+
+
+# Project description 
+
+## Overall goal of the project
+To detect if images are AI generated or not.
+
+##  What data are you going to run on
+We have found our data on Kaggle:
+https://www.kaggle.com/datasets/hassnainzaidi/ai-art-vs-human-art
+
+The metadata is:
+- Paintings, photography and AI generated
+- 975 files
+- Formats: .jpg, .png and .jpeg
+- 503.78 MB (Version 1)
+
+## What models do you expect to use
+Simple custom CNN for the binary classification.
+
 
 ## Project structure
 
