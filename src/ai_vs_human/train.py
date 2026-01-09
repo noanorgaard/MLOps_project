@@ -9,7 +9,7 @@ def train():
     # Hyperparameters
     lr = 1e-4
     batch_size = 64
-    epochs = 10
+    epochs = 2
 
     dataset = MyDataset() # <--- put something meaningful here 
     trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
@@ -33,6 +33,7 @@ def train():
     model.train() # Set mode to training (enables dropout/batchnorm)
 
     for epoch in range(epochs):
+        print(f"Starting epoch {epoch+1}/{epochs}...")
         running_loss = 0.0
         
         for images, labels in trainloader:
