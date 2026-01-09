@@ -20,7 +20,6 @@ The metadata is:
 ## What models do you expect to use
 Simple custom CNN for the binary classification.
 
-
 ## Project structure
 
 The directory structure of the project looks like this:
