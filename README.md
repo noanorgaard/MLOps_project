@@ -18,7 +18,7 @@ The metadata is:
 - 503.78 MB (Version 1)
 
 ## What models do you expect to use
-Simple custom CNN for the binary classification.
+ResNet18, finetuned.
 
 ## Project structure
 
