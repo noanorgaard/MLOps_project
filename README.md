@@ -1,8 +1,4 @@
-# ai_vs_human
-
-
-
-# Project description 
+# Project description (ai_vs_human)
 
 ## Overall goal of the project
 To detect if images are AI generated or not.
