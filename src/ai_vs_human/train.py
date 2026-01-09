@@ -3,13 +3,15 @@ from torch.utils.data import DataLoader
 from ai_vs_human.model import get_model
 from ai_vs_human.data import MyDataset
 
+print(f"dataset found at {MyDataset().processed_dir}")
+
 def train():
     # Hyperparameters
     lr = 1e-4
     batch_size = 64
     epochs = 10
 
-    dataset = MyDataset("data/...") # <--- put something meaningful here 
+    dataset = MyDataset() # <--- put something meaningful here 
     trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     model = get_model()
