@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 from ai_vs_human.model import get_model
 from ai_vs_human.data import MyDataset
+import wandb   # <-- ADDED
 
 print(f"dataset found at {MyDataset().processed_dir}")
 
@@ -17,6 +18,15 @@ def train():
     model = get_model()
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
     model = model.to(device)
+
+    # Initialize the weight and bias logging based on hyperparameters
+    wandb.init(
+    project="MLOps_project",
+    config={"lr": lr, "batch_size": batch_size, "epochs": epochs},
+    )
+
+    # Setting frequency for the logging of wandb and logging 'all'
+    wandb.watch(model, log="all", log_freq=100)
 
     # Only parameters that require gradients are optimized
     optimizer = torch.optim.Adam(
@@ -54,8 +64,12 @@ def train():
         epoch_loss = running_loss / len(trainloader)
         print(f"Epoch {epoch+1}/{epochs}, Loss: {epoch_loss:.4f}")
 
+        wandb.log({"train/loss": epoch_loss, "epoch": epoch + 1})
+
     torch.save(model.state_dict(), "models/checkpoint.pth")
     print("Training complete. Model saved.")
+
+    wandb.finish()
 
 if __name__ == "__main__":
     train()
