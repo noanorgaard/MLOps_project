@@ -132,6 +132,8 @@ def train():
     finally:
         wandb.finish()
 
+    torch.save(model.state_dict(), "models/final_model.pth")
+    print("Training complete. Model Saved.")
 
 if __name__ == "__main__":
     train()
