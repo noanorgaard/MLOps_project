@@ -1,6 +1,6 @@
 from torch.utils.data import Dataset
 
-from ai_vs_human.data import MyDataset
+from src.ai_vs_human.data import MyDataset
 
 
 def test_my_dataset():
