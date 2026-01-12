@@ -4,6 +4,7 @@ from ai_vs_human.model import get_model
 from ai_vs_human.data import MyDataset
 
 print(f"dataset found at {MyDataset().processed_dir}")
+print("Test mate :) ")
 
 def train():
     # Hyperparameters
