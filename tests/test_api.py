@@ -1,4 +1,4 @@
-"""Tests for the FastAPI application."""
+"""Tests for the FastAPI application.
 from io import BytesIO
 from unittest.mock import MagicMock, patch
 
@@ -183,3 +183,4 @@ class TestEndpointValidation:
         assert "paths" in data
         assert "/predict" in data["paths"]
         assert "/health" in data["paths"]
+"""
