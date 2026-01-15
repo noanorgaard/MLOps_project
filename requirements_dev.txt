@@ -537,7 +537,7 @@ urllib3==2.6.3
     # via
     #   dulwich
     #   requests
-uvicorn==0.34.0
+uvicorn==0.40.0
     # via ai-vs-human (pyproject.toml)
 vine==5.1.0
     # via
