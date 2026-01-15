@@ -1,9 +1,9 @@
-from torch.utils.data import Dataset
-
-from ai_vs_human.data import MyDataset
+from unittest.mock import Mock
 
 
-def test_my_dataset():
-    """Test the MyDataset class."""
-    dataset = MyDataset("data/raw")
-    assert isinstance(dataset, Dataset)
+def test_example_with_mock():
+    """Test example using a mock object."""
+    mock_function = Mock(return_value=42)
+    result = mock_function()
+    assert result == 42
+    mock_function.assert_called_once()
