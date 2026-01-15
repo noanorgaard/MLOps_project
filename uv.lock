@@ -37,7 +37,6 @@ dependencies = [
     { name = "typer" },
     { name = "uvicorn" },
     { name = "wandb" },
-    { name = "wandb" },
 ]
 
 [package.dev-dependencies]
