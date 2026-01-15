@@ -35,4 +35,3 @@ def test_my_dataset(train_flag, expected_len):
 
     targets = torch.unique(dataset.targets)
     assert torch.equal(targets, torch.tensor([0, 1]))
-
