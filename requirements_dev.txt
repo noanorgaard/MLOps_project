@@ -225,7 +225,7 @@ idna==3.11
     #   yarl
 iniconfig==2.3.0
     # via pytest
-invoke==2.2.0
+invoke==2.2.1
     # via ai-vs-human (pyproject.toml:dev)
 iterative-telemetry==0.0.10
     # via dvc
