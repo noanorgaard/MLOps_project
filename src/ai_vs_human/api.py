@@ -140,7 +140,7 @@ async def predict(file: Annotated[UploadFile, File()]) -> JSONResponse:
         img = Image.open(io.BytesIO(image_data)).convert("RGB")
 
         # Resize and normalize (same as training)
-        img = img.resize((224, 224), Image.LANCZOS)
+        img = img.resize((224, 224), Image.LANCZOS)  # type: ignore[attr-defined]
         arr = np.asarray(img, dtype=np.float32) / 255.0
         arr = np.clip(arr, 0.0, 1.0)
         arr = np.transpose(arr, (2, 0, 1))  # HWC -> CHW
