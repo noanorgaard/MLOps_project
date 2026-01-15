@@ -1,4 +1,5 @@
 import torch
+import wandb
 from torch.utils.data import DataLoader
 from ai_vs_human.model import get_model
 from ai_vs_human.data import MyDataset
@@ -10,7 +11,7 @@ def train():
     # Hyperparameters
     lr = 1e-4
     batch_size = 64
-    epochs = 2
+    epochs =20
 
     dataset = MyDataset()  # <--- put something meaningful here
     trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
@@ -31,6 +32,10 @@ def train():
     print("Initiating training loop...")
 
     model.train()  # Set mode to training (enables dropout/batchnorm)
+    wandb.init(project="MLOps_project", name="cloud-run-001",config={
+        "lr": lr,
+        "batch_size": batch_size,
+        "epochs": epochs,},)
 
     for epoch in range(epochs):
         print(f"Starting epoch {epoch+1}/{epochs}...")
@@ -53,9 +58,11 @@ def train():
 
         epoch_loss = running_loss / len(trainloader)
         print(f"Epoch {epoch+1}/{epochs}, Loss: {epoch_loss:.4f}")
-
+        wandb.log({"epoch": epoch + 1, "loss": epoch_loss})
     torch.save(model.state_dict(), "models/checkpoint.pth")
     print("Training complete. Model saved.")
+    wandb.save("models/checkpoint.pth")
+    wandb.finish()
 
 
 if __name__ == "__main__":
