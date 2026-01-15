@@ -26,9 +26,7 @@ def train():
 
     Path("models").mkdir(exist_ok=True)
 
-    Path("models").mkdir(exist_ok=True)
-
-    dataset = MyDataset()  # <--- put something meaningful here
+    dataset = MyDataset("data/processed")  # <--- put something meaningful here
     trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     model = get_model()
