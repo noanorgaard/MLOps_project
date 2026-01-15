@@ -73,3 +73,11 @@ exclude_lines = [
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
 ]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src"]
+mypy_path = ["src"]
+explicit_package_bases = true
+ignore_missing_imports = true
+warn_unused_configs = true
