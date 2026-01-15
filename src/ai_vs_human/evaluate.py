@@ -22,7 +22,9 @@ def predict_from_logit(logit: torch.Tensor) -> Tuple[str, float]:
     return prediction, confidence
 
 
-def evaluate_batch(model: torch.nn.Module, images: torch.Tensor, device: torch.device) -> Tuple[torch.Tensor, torch.Tensor]:
+def evaluate_batch(
+    model: torch.nn.Module, images: torch.Tensor, device: torch.device
+) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     Evaluate a batch of images.
 
@@ -36,9 +38,9 @@ def evaluate_batch(model: torch.nn.Module, images: torch.Tensor, device: torch.d
     """
     model.eval()
     images = images.to(device)
-    
+
     with torch.no_grad():
         logits = model(images).squeeze(-1)
         confidences = torch.sigmoid(logits)
-    
+
     return logits, confidences
