@@ -52,9 +52,7 @@ async def load_model_from_wandb() -> None:
 
     try:
         # Verify WANDB_API_KEY is set
-
-        #api_key = os.getenv("WANDB_API_KEY")
-        api_key = get_api_key()  # get API key from user input
+        api_key = os.getenv("WANDB_API_KEY")
         if not api_key:
             raise ValueError("WANDB_API_KEY environment variable is not set")
         
