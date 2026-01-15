@@ -11,6 +11,7 @@ from pathlib import Path
 print(f"dataset found at {MyDataset().processed_dir}")
 
 
+
  # Accuracy calculation
 def _binary_accuracy_from_logits(logits: torch.Tensor, labels: torch.Tensor) -> float:
     """Accuracy for BCEWithLogitsLoss (binary classification)."""
@@ -26,11 +27,15 @@ def train():
 
     Path("models").mkdir(exist_ok=True)
 
-    dataset = MyDataset() # <--- put something meaningful here 
+    Path("models").mkdir(exist_ok=True)
+
+    dataset = MyDataset()  # <--- put something meaningful here
     trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     model = get_model()
-    device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+    device = torch.device(
+        "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+    )
     model = model.to(device)
 
     # Initialize the W&B run
@@ -43,11 +48,8 @@ def train():
     wandb.watch(model, log="all", log_freq=100)
 
     # Only parameters that require gradients are optimized
-    optimizer = torch.optim.Adam(
-        filter(lambda p: p.requires_grad, model.parameters()), 
-        lr=lr
-    )
-    
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
+
     # Loss function for binary classification
     criterion = torch.nn.BCEWithLogitsLoss()
 
@@ -58,22 +60,22 @@ def train():
 
     try:
         for epoch in range(epochs):
-            model.train() # Set mode to training (enables dropout/batchnorm)
+            model.train()  # Set mode to training (enables dropout/batchnorm)
             print(f"Starting epoch {epoch+1}/{epochs}...")
             running_loss = 0.0
             running_acc = 0.0
             n_batches = 0
-            
+    
             for i, (images, labels) in enumerate(trainloader):
                 images, labels = images.to(device), labels.to(device)
 
                 optimizer.zero_grad()
 
                 outputs = model(images)
-                
+    
                 # Squeeze output to match labels
                 loss = criterion(outputs.squeeze(), labels.float())
-                
+    
                 loss.backward()
                 optimizer.step()
 
@@ -134,6 +136,7 @@ def train():
 
     torch.save(model.state_dict(), "models/final_model.pth")
     print("Training complete. Model Saved.")
+
 
 if __name__ == "__main__":
     train()
