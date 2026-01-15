@@ -25,12 +25,13 @@ def test(ctx: Context) -> None:
     """Run tests."""
     ctx.run("uv run coverage run -m pytest tests/", echo=True, pty=not WINDOWS)
     ctx.run("uv run coverage report -m -i", echo=True, pty=not WINDOWS)
-    
-    
+
+
 @task
 def api(ctx: Context, port: int = 8000) -> None:
     """Run the API locally (requires .env file with WANDB_API_KEY)."""
     ctx.run(f"uv run uvicorn {PROJECT_NAME}.api:app --host 0.0.0.0 --port {port} --reload", echo=True, pty=not WINDOWS)
+
 
 @task
 def docker_build(ctx: Context, progress: str = "plain") -> None:
@@ -44,14 +45,12 @@ def docker_build(ctx: Context, progress: str = "plain") -> None:
         f"docker build -t api:latest . -f dockerfiles/api.dockerfile --progress={progress}", echo=True, pty=not WINDOWS
     )
 
+
 @task
 def docker_run_api(ctx: Context, port: int = 8000) -> None:
     """Run the API docker container."""
-    ctx.run(
-        f"docker run -p {port}:8000 api:latest",
-        echo=True,
-        pty=not WINDOWS
-    )
+    ctx.run(f"docker run -p {port}:8000 api:latest", echo=True, pty=not WINDOWS)
+
 
 # Documentation commands
 @task
