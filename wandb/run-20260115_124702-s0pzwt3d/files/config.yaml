@@ -1,0 +1,54 @@
+_wandb:
+    value:
+        cli_version: 0.24.0
+        e:
+            jddkqqcu60i05wv1q7gv3s2yihz6y3b3:
+                args:
+                    - --epochs
+                    - "1"
+                codePath: src/ai_vs_human/train.py
+                codePathLocal: src/ai_vs_human/train.py
+                cpu_count: 4
+                cpu_count_logical: 8
+                disk:
+                    /:
+                        total: "103865303040"
+                        used: "13511532544"
+                executable: /home/madsl/MLOps_project/.venv/bin/python
+                git:
+                    commit: 21b1741c71d1d0ade58e694f0c7634830d0bd72b
+                    remote: git@github.com:noanorgaard/MLOps_project.git
+                host: ml-train-vm
+                memory:
+                    total: "31538147328"
+                os: Linux-6.8.0-1045-gcp-x86_64-with-glibc2.35
+                program: /home/madsl/MLOps_project/src/ai_vs_human/train.py
+                python: CPython 3.12.12
+                root: /home/madsl/MLOps_project
+                startedAt: "2026-01-15T12:47:02.738823Z"
+                writerId: jddkqqcu60i05wv1q7gv3s2yihz6y3b3
+        m: []
+        python_version: 3.12.12
+        t:
+            "1":
+                - 1
+                - 41
+                - 105
+            "2":
+                - 1
+                - 41
+                - 105
+            "3":
+                - 2
+                - 13
+                - 16
+            "4": 3.12.12
+            "5": 0.24.0
+            "12": 0.24.0
+            "13": linux-x86_64
+batch_size:
+    value: 64
+epochs:
+    value: 1
+lr:
+    value: 0.0001

@@ -1,0 +1,27 @@
+{
+  "os": "Linux-6.8.0-1045-gcp-x86_64-with-glibc2.35",
+  "python": "CPython 3.12.12",
+  "startedAt": "2026-01-15T11:09:28.508105Z",
+  "program": "/home/madsl/MLOps_project/src/ai_vs_human/train.py",
+  "codePath": "src/ai_vs_human/train.py",
+  "codePathLocal": "src/ai_vs_human/train.py",
+  "git": {
+    "remote": "https://github.com/noanorgaard/MLOps_project",
+    "commit": "68882ad14e482c57e79f771c3c8504ea99f8dac3"
+  },
+  "root": "/home/madsl/MLOps_project",
+  "host": "ml-train-vm",
+  "executable": "/home/madsl/MLOps_project/.venv/bin/python",
+  "cpu_count": 4,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "103865303040",
+      "used": "5968941056"
+    }
+  },
+  "memory": {
+    "total": "31538139136"
+  },
+  "writerId": "maiu0h6grn1at2gu7dgns58o6jy2vq2k"
+}

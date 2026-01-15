@@ -3,15 +3,22 @@ import wandb
 from torch.utils.data import DataLoader
 from ai_vs_human.model import get_model
 from ai_vs_human.data import MyDataset
+import argparse
 
 print(f"dataset found at {MyDataset().processed_dir}")
 
 
 def train():
     # Hyperparameters
-    lr = 1e-4
-    batch_size = 64
-    epochs =20
+    parser = argparse.ArgumentParser(description="Train AI vs Human classifier")
+    parser.add_argument("--lr", type=float, default=1e-4)
+    parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--epochs", type=int, default=2)
+    args = parser.parse_args()
+
+    lr = args.lr
+    batch_size = args.batch_size
+    epochs = args.epochs
 
     dataset = MyDataset()  # <--- put something meaningful here
     trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
@@ -36,6 +43,10 @@ def train():
         "lr": lr,
         "batch_size": batch_size,
         "epochs": epochs,},)
+    artifact = wandb.Artifact(name="ai_vs_human_model",type="model",metadata={
+        "epochs": epochs,
+        "lr": lr,
+        "batch_size": batch_size,},)
 
     for epoch in range(epochs):
         print(f"Starting epoch {epoch+1}/{epochs}...")
@@ -61,7 +72,8 @@ def train():
         wandb.log({"epoch": epoch + 1, "loss": epoch_loss})
     torch.save(model.state_dict(), "models/checkpoint.pth")
     print("Training complete. Model saved.")
-    wandb.save("models/checkpoint.pth")
+    artifact.add_file("models/checkpoint.pth")
+    wandb.log_artifact(artifact)
     wandb.finish()
 
 
