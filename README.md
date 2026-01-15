@@ -1,8 +1,4 @@
-# ai_vs_human
-
-
-
-# Project description 
+# Project description (ai_vs_human)
 
 ## Overall goal of the project
 To detect if images are AI generated or not.
@@ -18,7 +14,7 @@ The metadata is:
 - 503.78 MB (Version 1)
 
 ## What models do you expect to use
-Simple custom CNN for the binary classification.
+ResNet18, finetuned.
 
 ## Project structure
 
