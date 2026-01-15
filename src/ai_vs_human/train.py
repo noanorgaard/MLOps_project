@@ -12,7 +12,7 @@ def train():
     batch_size = 64
     epochs = 2
 
-    dataset = MyDataset()  # <--- put something meaningful here
+    dataset = MyDataset("data/processed")  # <--- put something meaningful here
     trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     model = get_model()
