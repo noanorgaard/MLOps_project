@@ -35,4 +35,4 @@ ENV PYTHONPATH=/app/src
 
 # --- Default command ---
 # Recommendation: use 'python -m' to handle imports correctly
-CMD ["python", "-m", "ai_vs_human.train"]
+ENTRYPOINT ["python", "src/ai_vs_human/train.py"]

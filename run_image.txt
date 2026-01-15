@@ -1,0 +1,7 @@
+
+Run the iamge with the following command: 
+
+docker run   -e WANDB_API_KEY=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
+  -v /mnt/data:/mnt/data   -v $PWD/data:/app/data   europe-west1-docker.pkg.dev/mlo
+ps-project-22/container-registry/ai-vs-human-train:$GIT_SHA   --lr 3e-4   --batch-s
+ize 128   --epochs 2
