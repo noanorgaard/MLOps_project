@@ -7,17 +7,16 @@ import wandb
 from pathlib import Path
 
 
-
 print(f"dataset found at {MyDataset().processed_dir}")
 
 
-
- # Accuracy calculation
+# Accuracy calculation
 def _binary_accuracy_from_logits(logits: torch.Tensor, labels: torch.Tensor) -> float:
     """Accuracy for BCEWithLogitsLoss (binary classification)."""
     probs = torch.sigmoid(logits)
     preds = (probs > 0.5).long()
     return (preds == labels.long()).float().mean().item()
+
 
 def train():
     # Hyperparameters
@@ -40,8 +39,8 @@ def train():
 
     # Initialize the W&B run
     run = wandb.init(
-    project="MLOps_project",
-    config={"lr": lr, "batch_size": batch_size, "epochs": epochs, "device": str(device)},
+        project="MLOps_project",
+        config={"lr": lr, "batch_size": batch_size, "epochs": epochs, "device": str(device)},
     )
 
     # Tracking weights/gradient over time
@@ -65,17 +64,17 @@ def train():
             running_loss = 0.0
             running_acc = 0.0
             n_batches = 0
-    
+
             for i, (images, labels) in enumerate(trainloader):
                 images, labels = images.to(device), labels.to(device)
 
                 optimizer.zero_grad()
 
                 outputs = model(images)
-    
+
                 # Squeeze output to match labels
                 loss = criterion(outputs.squeeze(), labels.float())
-    
+
                 loss.backward()
                 optimizer.step()
 
@@ -99,9 +98,7 @@ def train():
                     print(f"Epoch {epoch}, iter {i}, loss: {loss.item():.4f}")
 
                     try:
-                        images_log = wandb.Image(
-                            images[:5].detach().cpu(), caption="Input images"
-                        )
+                        images_log = wandb.Image(images[:5].detach().cpu(), caption="Input images")
                         wandb.log({"images": images_log})
                     except Exception:
                         pass
@@ -115,9 +112,7 @@ def train():
             epoch_loss = running_loss / max(n_batches, 1)
             epoch_acc = running_acc / max(n_batches, 1)
             print(f"Epoch {epoch+1}/{epochs}, Loss: {epoch_loss:.4f}, Acc: {epoch_acc:.4f}")
-            wandb.log(
-                {"train/epoch_loss": epoch_loss, "train/epoch_acc": epoch_acc}
-            )
+            wandb.log({"train/epoch_loss": epoch_loss, "train/epoch_acc": epoch_acc})
 
         # Save + artifact
         ckpt_path = "models/checkpoint.pth"
