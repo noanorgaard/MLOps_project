@@ -266,7 +266,7 @@ def download_data(raw_dir: Path) -> Path:
     print(f"Copied {copied_ai} AI images and {copied_human} Human images to {raw_dir}.")
     return dataset_path
 
-
+"""
 def prepare_data(
     raw_dir: Path = typer.Option(Path("data/raw"), help="Raw data directory containing 'ai' and 'human' subfolders"),
     processed_dir: Path = typer.Option(Path("data/processed"), help="Where to write processed tensors"),
@@ -274,6 +274,15 @@ def prepare_data(
     train_split: float = typer.Option(0.8, help="Fraction of data to use for training"),
     seed: int = typer.Option(42, help="Shuffle seed"),
 ) -> None:
+"""
+def prepare_data(
+    raw_dir: Path = Path("data/raw"),
+    processed_dir: Path = Path("data/processed"),
+    image_size: int = 224,
+    train_split: float = 0.8,
+    seed: int = 42,
+) -> None:
+
     """Preprocess raw image dataset into torch tensors."""
 
     # check if raw dir exists

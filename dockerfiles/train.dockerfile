@@ -1,5 +1,8 @@
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
+ARG WANDB_API_KEY
+ENV WANDB_API_KEY=${WANDB_API_KEY}
+
 RUN apt update && \
     apt install --no-install-recommends -y build-essential gcc && \
     apt clean && rm -rf /var/lib/apt/lists/*
