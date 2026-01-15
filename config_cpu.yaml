@@ -4,3 +4,6 @@ workerPoolSpecs:
     replicaCount: 1
     containerSpec:
       imageUri: europe-west1-docker.pkg.dev/mlops-project-22/container-registry/ai-vs-human-train:f996d71
+      env:
+      - name: WANDB_API_KEY
+        value: $WANDB_API_KEY
