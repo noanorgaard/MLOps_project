@@ -16,6 +16,23 @@ The metadata is:
 ## What models do you expect to use
 ResNet18, finetuned.
 
+## Setup
+
+### Environment Configuration
+
+**Required:** Create a `.env` file in the project root with your Weights & Biases API key:
+
+```bash
+cp .env.template .env
+```
+
+Then edit `.env` and add your actual API key:
+```
+WANDB_API_KEY=your_key_here
+```
+
+Get your API key from: https://wandb.ai/authorize
+
 ## Project structure
 
 The directory structure of the project looks like this:
@@ -67,3 +84,5 @@ The directory structure of the project looks like this:
 Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
 a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
 started with Machine Learning Operations (MLOps).
+
+
