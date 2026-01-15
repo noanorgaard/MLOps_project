@@ -41,6 +41,7 @@ dev = [
     "pytest==8.3.4",
     "ruff==0.1.3",
     "mkdocstrings-python==1.12.2",
+    "mypy>=1.19.1",
 ]
 
 
@@ -61,4 +62,14 @@ explicit = true
 line-length = 120
 
 [tool.coverage.run]
+source = ["src/ai_vs_human"]
 omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

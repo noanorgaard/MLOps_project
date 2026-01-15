@@ -84,7 +84,7 @@ def _is_image_file(p: Path) -> bool:
 
 def _load_and_process_image(path: Path, size: int) -> torch.Tensor:
     img = Image.open(path).convert("RGB")
-    img = img.resize((size, size), Image.LANCZOS)
+    img = img.resize((size, size), Image.LANCZOS)  # type: ignore[attr-defined]
     arr = np.asarray(img, dtype=np.float32) / 255.0
     arr = np.clip(arr, 0.0, 1.0)
     arr = np.transpose(arr, (2, 0, 1))
@@ -300,6 +300,7 @@ def prepare_data(
         train_split=train_split,
         seed=seed,
     )
+
 
 if __name__ == "__main__":
     typer.run(prepare_data)
