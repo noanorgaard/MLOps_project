@@ -28,7 +28,7 @@ def load_model():
     artifact_name = os.getenv("WANDB_ARTIFACTxx", "ai_vs_human_model:latest")
 
     # Construct full artifact path
-    artifact_path = f"{entity}/{project}/{artifact_name}"
+    artifact_path = f"{entity}/registry/{artifact_name}"
 
     logger.info(f"Loading model artifact from W&B: {artifact_path}")
     device = torch.device(
