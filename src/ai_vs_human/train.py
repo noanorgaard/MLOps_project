@@ -109,22 +109,22 @@ def train(config: dict | None = None):
 
     try:
         for epoch in range(epochs):
-            model.train() # Set mode to training (enables dropout/batchnorm)
+            model.train()  # Set mode to training (enables dropout/batchnorm)
             print(f"Starting epoch {epoch+1}/{epochs}...")
             running_loss = 0.0
             running_acc = 0.0
             n_batches = 0
-            
+
             for i, (images, labels) in enumerate(trainloader):
                 images, labels = images.to(device), labels.to(device)
 
                 optimizer.zero_grad()
 
                 outputs = model(images)
-                
+
                 # Squeeze output to match labels
                 loss = criterion(outputs.squeeze(), labels.float())
-                
+
                 loss.backward()
                 optimizer.step()
 

@@ -1,7 +1,7 @@
-from unittest.mock import Mock
 import torch
 from ai_vs_human.model import AIOrNotClassifier
 import pytest
+
 
 @pytest.mark.parametrize("batch_size, dropout_rate", [(1, 0.3), (4, 0.5)])
 def test_model_forward_shape(batch_size, dropout_rate):
