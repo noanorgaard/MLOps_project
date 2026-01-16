@@ -47,18 +47,31 @@ jobs:
 
       - name: Start API in background
         run: |
-          uv run uvicorn ai_vs_human.api:app --host 0.0.0.0 --port 8000 &
-          echo "Waiting for API to start..."
-          sleep 15
+          uv run uvicorn ai_vs_human.api:app --host 0.0.0.0 --port 8000 > /tmp/api.log 2>&1 &
+          API_PID=$!
+          echo "API started with PID: $API_PID"
+          echo "Waiting for API to start and load model..."
+          sleep 5
         env:
           WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
           WANDB_ENTITY: ${{ secrets.WANDB_ENTITY }}
           WANDB_PROJECT: ${{ secrets.WANDB_PROJECT }}
 
-      - name: Check API health
+      - name: Check API health with retries
         run: |
-          curl -f http://localhost:8000/health || exit 1
-          echo "API is healthy and ready for load testing"
+          for i in {1..30}; do
+            echo "Health check attempt $i/30..."
+            if curl -f http://localhost:8000/health > /dev/null 2>&1; then
+              echo "✅ API is healthy and ready for load testing"
+              exit 0
+            fi
+            echo "Waiting... ($((i * 2)) seconds elapsed)"
+            sleep 2
+          done
+          echo "❌ API failed to start after 60 seconds"
+          echo "API logs:"
+          cat /tmp/api.log
+          exit 1
 
       - name: Run pytest-based load tests
         run: uv run pytest tests/loadtests/test_load.py -v -s
