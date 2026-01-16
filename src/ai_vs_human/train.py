@@ -5,9 +5,43 @@ from ai_vs_human.data import MyDataset
 
 import wandb
 from pathlib import Path
+import os
 
 
-print(f"dataset found at {MyDataset().processed_dir}")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]  # Adjusted to point to project root
+
+
+def _wandb_setup() -> None:
+    """
+    Make W&B work from any profile (Docker/CI/local) by:
+    - Using WANDB_API_KEY if provided (non-interactive)
+    - Writing wandb files into the repo (not ~/.config, ~/.cache)
+    """
+
+    wandb_dir = PROJECT_ROOT / ".wandb" / "wandb"
+    cache_dir = PROJECT_ROOT / ".wandb_cache"
+    config_dir = PROJECT_ROOT / ".wandb_config"
+
+    wandb_dir.mkdir(parents=True, exist_ok=True)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    config_dir.mkdir(parents=True, exist_ok=True)
+
+    # Force W&B to use these locations (no setdefault)
+    os.environ["WANDB_DIR"] = str(wandb_dir)
+    os.environ["WANDB_CACHE_DIR"] = str(cache_dir)
+    os.environ["WANDB_CONFIG_DIR"] = str(config_dir)
+
+    # Force online so it fails loudly if auth/network is wrong
+    os.environ.setdefault("WANDB_MODE", "online")
+
+    print("WANDB_DIR in code =", os.environ.get("WANDB_DIR"))
+    print("WANDB_MODE in code =", os.environ.get("WANDB_MODE"))
+
+    api_key = os.getenv("WANDB_API_KEY")
+    if api_key:
+        wandb.login(key=api_key, relogin=True)
+    else:
+        wandb.login()
 
 
 # Accuracy calculation
@@ -18,15 +52,39 @@ def _binary_accuracy_from_logits(logits: torch.Tensor, labels: torch.Tensor) -> 
     return (preds == labels.long()).float().mean().item()
 
 
-def train():
-    # Hyperparameters
-    lr = 1e-4
-    batch_size = 64
-    epochs = 2
+def train(config: dict | None = None):
+    """Train the model with hyperparameters from config or defaults.
 
-    Path("models").mkdir(exist_ok=True)
+    Args:
+        config: Optional dict with hyperparameters. If None, uses defaults.
+                When run in a sweep, wandb.init() provides wandb.config.
+    """
+    (PROJECT_ROOT / "models").mkdir(exist_ok=True)
+    _wandb_setup()
 
-    dataset = MyDataset("data/processed")  # <--- put something meaningful here
+    from ai_vs_human.data import prepare_data
+
+    from pathlib import Path
+
+    prepare_data(raw_dir=Path("data/raw"), processed_dir=Path("data/processed"))
+
+    # Initialize the W&B run (sweep or standalone)
+    run = wandb.init(
+        project=os.getenv("WANDB_PROJECT", "MLOps_project"),
+        entity=os.getenv("WANDB_ENTITY"),
+        config=config or {"lr": 1e-4, "batch_size": 64, "epochs": 2},
+    )
+
+    # Get hyperparameters from wandb.config (works for both sweeps and regular runs)
+    cfg = wandb.config
+    lr = cfg.lr
+    batch_size = cfg.batch_size
+    epochs = cfg.epochs
+
+    dataset = MyDataset(raw_dir="data/raw", processed_dir="data/processed", train=True)
+
+    print(f"dataset found at {dataset.processed_dir}")
+    print(f"Training with lr={lr}, batch_size={batch_size}, epochs={epochs}")
     trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     model = get_model()
@@ -34,12 +92,6 @@ def train():
         "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     )
     model = model.to(device)
-
-    # Initialize the W&B run
-    run = wandb.init(
-        project="MLOps_project",
-        config={"lr": lr, "batch_size": batch_size, "epochs": epochs, "device": str(device)},
-    )
 
     # Tracking weights/gradient over time
     wandb.watch(model, log="all", log_freq=100)
@@ -96,8 +148,8 @@ def train():
                     print(f"Epoch {epoch}, iter {i}, loss: {loss.item():.4f}")
 
                     try:
-                        images_log = wandb.Image(images[:5].detach().cpu(), caption="Input images")
-                        wandb.log({"images": images_log})
+                        imgs = [wandb.Image(img.detach().cpu()) for img in images[:5]]
+                        wandb.log({"images": imgs}, step=global_step)
                     except Exception:
                         pass
 
@@ -105,15 +157,19 @@ def train():
                         [p.grad.flatten() for p in model.parameters() if p.grad is not None],
                         0,
                     )
-                    wandb.log({"gradients": wandb.Histogram(grads)})
+                    wandb.log({"gradients": wandb.Histogram(grads.cpu().numpy().tolist())}, step=global_step)
 
+            # Epoch metrics
             epoch_loss = running_loss / max(n_batches, 1)
             epoch_acc = running_acc / max(n_batches, 1)
             print(f"Epoch {epoch+1}/{epochs}, Loss: {epoch_loss:.4f}, Acc: {epoch_acc:.4f}")
-            wandb.log({"train/epoch_loss": epoch_loss, "train/epoch_acc": epoch_acc})
+            wandb.log(
+                {"train/epoch_loss": epoch_loss, "train/epoch_acc": epoch_acc},
+                step=global_step,
+            )
 
         # Save + artifact
-        ckpt_path = "models/checkpoint.pth"
+        ckpt_path = PROJECT_ROOT / "models" / "checkpoint.pth"
         torch.save(model.state_dict(), ckpt_path)
 
         artifact = wandb.Artifact(
@@ -121,13 +177,25 @@ def train():
             type="model",
             description="Model trained on ai_vs_human dataset",
         )
-        artifact.add_file(ckpt_path)
+        artifact.add_file(str(ckpt_path))
         run.log_artifact(artifact)
+
+        ENTITY = "MLOps model"  # Registry name
+        COLLECTION_NAME = "ai_vs_human_model"  # Collection name
+
+        # Directly linkning the artifact to the model registry
+        run.link_artifact(
+            artifact,
+            f"wandb-registry-{ENTITY}/{COLLECTION_NAME}",
+            aliases=["latest"],
+        )
 
     finally:
         wandb.finish()
 
-    torch.save(model.state_dict(), "models/final_model.pth")
+    # Final model save
+    final_path = PROJECT_ROOT / "models" / "final_model.pth"
+    torch.save(model.state_dict(), final_path)
     print("Training complete. Model Saved.")
 
 
