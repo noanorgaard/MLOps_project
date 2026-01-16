@@ -32,13 +32,15 @@ class AIvsHumanUser(HttpUser):
         # Generate 5 different test images to simulate variety
         for i in range(5):
             # Create a random RGB image
-            img = Image.new("RGB", (224, 224), color=(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
-            
+            img = Image.new(
+                "RGB", (224, 224), color=(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+            )
+
             # Convert to bytes
             img_bytes = io.BytesIO()
             img.save(img_bytes, format="JPEG")
             img_bytes.seek(0)
-            
+
             self.test_images.append(img_bytes.getvalue())
 
     @task(10)
@@ -49,16 +51,11 @@ class AIvsHumanUser(HttpUser):
         """
         # Select a random test image
         image_data = random.choice(self.test_images)
-        
+
         # Create file-like object
         files = {"file": ("test_image.jpg", io.BytesIO(image_data), "image/jpeg")}
-        
-        with self.client.post(
-            "/predict",
-            files=files,
-            catch_response=True,
-            name="/predict"
-        ) as response:
+
+        with self.client.post("/predict", files=files, catch_response=True, name="/predict") as response:
             if response.status_code == 200:
                 result = response.json()
                 if "prediction" in result and "confidence" in result:

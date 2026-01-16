@@ -67,9 +67,11 @@ def serve_docs(ctx: Context) -> None:
 
 # Load testing commands
 @task
-def load_test_locust(ctx: Context, host: str = "http://localhost:8000", users: int = 50, rate: int = 5, time: str = "2m") -> None:
+def load_test_locust(
+    ctx: Context, host: str = "http://localhost:8000", users: int = 50, rate: int = 5, time: str = "2m"
+) -> None:
     """Run Locust load test in headless mode.
-    
+
     Args:
         host: API host URL
         users: Number of concurrent users to simulate
