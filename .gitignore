@@ -6,6 +6,8 @@ manual_test/
 # data files
 data/
 models/
+wandb/
+artifacts/
 
 # other local dev info
 .vscode/

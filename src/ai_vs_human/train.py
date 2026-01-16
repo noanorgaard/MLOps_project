@@ -88,18 +88,17 @@ def train(config: dict | None = None):
     trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     model = get_model()
-    device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+    device = torch.device(
+        "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+    )
     model = model.to(device)
 
     # Tracking weights/gradient over time
     wandb.watch(model, log="all", log_freq=100)
 
     # Only parameters that require gradients are optimized
-    optimizer = torch.optim.Adam(
-        filter(lambda p: p.requires_grad, model.parameters()), 
-        lr=lr
-    )
-    
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
+
     # Loss function for binary classification
     criterion = torch.nn.BCEWithLogitsLoss()
 
@@ -194,6 +193,7 @@ def train(config: dict | None = None):
     final_path = PROJECT_ROOT / "models" / "final_model.pth"
     torch.save(model.state_dict(), final_path)
     print("Training complete. Model Saved.")
+
 
 if __name__ == "__main__":
     train()
