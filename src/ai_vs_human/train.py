@@ -157,7 +157,7 @@ def train(config: dict | None = None):
                         [p.grad.flatten() for p in model.parameters() if p.grad is not None],
                         0,
                     )
-                    wandb.log({"gradients": wandb.Histogram(grads.cpu().numpy())}, step=global_step)
+                    wandb.log({"gradients": wandb.Histogram(grads.cpu().numpy().tolist())}, step=global_step)
 
             # Epoch metrics
             epoch_loss = running_loss / max(n_batches, 1)
