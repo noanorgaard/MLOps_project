@@ -23,7 +23,7 @@ def load_model():
     logger.info("WANDB_API_KEY found in environment")
 
     # W&B configuration from environment variables
-    entity = os.getenv("WANDB_ENTITY", "thordeibert-danmarks-tekniske-universitet-dtu/registry")
+    entity = os.getenv("WANDB_ENTITY", "thordeibert-danmarks-tekniske-universitet-dtu-org/registry")
     project = os.getenv("WANDB_PROJECT", "MLOps_project")
     artifact_name = os.getenv("WANDB_ARTIFACT", "ai_vs_human_model:latest")
 
