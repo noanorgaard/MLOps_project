@@ -11,10 +11,8 @@ Uses pytest with FastAPI TestClient for API testing.
 """
 
 import io
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
 import torch
 from fastapi.testclient import TestClient
@@ -252,6 +250,7 @@ class TestModelIntegration:
             mock_model.return_value = mock_output
 
             response = client.post("/predict", files={"file": ("test.png", img_bytes, "image/png")})
+            assert response.status_code == 200
 
             # Verify model was called with correct tensor shape
             assert mock_model.called
