@@ -1,4 +1,4 @@
-from src.ai_vs_human.model import get_model
+from ai_vs_human.model import get_model
 import wandb
 import os
 import time
