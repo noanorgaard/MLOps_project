@@ -62,13 +62,13 @@ jobs:
           for i in {1..30}; do
             echo "Health check attempt $i/30..."
             if curl -f http://localhost:8000/health > /dev/null 2>&1; then
-              echo "✅ API is healthy and ready for load testing"
+              echo "API is healthy and ready for load testing"
               exit 0
             fi
             echo "Waiting... ($((i * 2)) seconds elapsed)"
             sleep 2
           done
-          echo "❌ API failed to start after 60 seconds"
+          echo "API failed to start after 60 seconds"
           echo "API logs:"
           cat /tmp/api.log
           exit 1
