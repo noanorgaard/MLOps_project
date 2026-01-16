@@ -244,9 +244,7 @@ def download_data(raw_dir: Path) -> Path:
             dir_parts = [s.lower() for s in rel.parts[:-1]]
             if any("realart" in s or "human" in s for s in dir_parts):
                 return "human"
-            if any(
-                "aiartdata" in s or "ai" in s or "generated" in s for s in dir_parts
-            ):
+            if any("aiartdata" in s or "ai" in s or "generated" in s for s in dir_parts):
                 return "ai"
             return None
 
@@ -287,14 +285,11 @@ def prepare_data(
     train_split: float = 0.8,
     seed: int = 42,
 ) -> None:
-
     """Preprocess raw image dataset into torch tensors."""
 
     # check if raw dir exists
     if not raw_dir.exists():
-        print(
-            f"Raw directory {raw_dir} not found — creating and downloading Kaggle dataset..."
-        )
+        print(f"Raw directory {raw_dir} not found — creating and downloading Kaggle dataset...")
         raw_dir.mkdir(parents=True, exist_ok=True)
         download_data(raw_dir)
 

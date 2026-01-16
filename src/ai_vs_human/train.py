@@ -89,11 +89,7 @@ def train(config: dict | None = None):
 
     model = get_model()
     device = torch.device(
-        "cuda"
-        if torch.cuda.is_available()
-        else "mps"
-        if torch.backends.mps.is_available()
-        else "cpu"
+        "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     )
     model = model.to(device)
 
@@ -101,9 +97,7 @@ def train(config: dict | None = None):
     wandb.watch(model, log="all", log_freq=100)
 
     # Only parameters that require gradients are optimized
-    optimizer = torch.optim.Adam(
-        filter(lambda p: p.requires_grad, model.parameters()), lr=lr
-    )
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
 
     # Loss function for binary classification
     criterion = torch.nn.BCEWithLogitsLoss()
@@ -160,20 +154,14 @@ def train(config: dict | None = None):
                         pass
 
                     grads = torch.cat(
-                        [
-                            p.grad.flatten()
-                            for p in model.parameters()
-                            if p.grad is not None
-                        ],
+                        [p.grad.flatten() for p in model.parameters() if p.grad is not None],
                         0,
                     )
                     wandb.log({"gradients": wandb.Histogram(grads)}, step=global_step)
 
             epoch_loss = running_loss / max(n_batches, 1)
             epoch_acc = running_acc / max(n_batches, 1)
-            print(
-                f"Epoch {epoch+1}/{epochs}, Loss: {epoch_loss:.4f}, Acc: {epoch_acc:.4f}"
-            )
+            print(f"Epoch {epoch+1}/{epochs}, Loss: {epoch_loss:.4f}, Acc: {epoch_acc:.4f}")
             wandb.log(
                 {"train/epoch_loss": epoch_loss, "train/epoch_acc": epoch_acc},
                 step=global_step,
