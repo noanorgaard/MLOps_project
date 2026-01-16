@@ -115,6 +115,14 @@ uv run invoke load-test-locust-web
 # Then open http://localhost:8089 in your browser
 ```
 
+### API Testing
+```bash
+# Run all tests
+uv run pytest tests/unittests/test_api.py -v
+```
+
+
+
 For detailed information about load testing scenarios see [tests/loadtests/README.md](tests/loadtests/README.md).
 Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
 a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting

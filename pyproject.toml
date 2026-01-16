@@ -50,6 +50,7 @@ dev = [
     "locust>=2.43.1",
     "requests>=2.32.5",
     "types-pyyaml>=6.0.12.20250915",
+    "pytest-cov>=6.3.0",
 ]
 
 
