@@ -5,9 +5,7 @@ Run with: uv run locust -f tests/loadtests/locustfile.py --host=http://localhost
 """
 
 import io
-import os
 import random
-from pathlib import Path
 
 from locust import HttpUser, between, task
 from PIL import Image
