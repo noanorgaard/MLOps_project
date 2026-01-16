@@ -244,7 +244,9 @@ def download_data(raw_dir: Path) -> Path:
             dir_parts = [s.lower() for s in rel.parts[:-1]]
             if any("realart" in s or "human" in s for s in dir_parts):
                 return "human"
-            if any("aiartdata" in s or "ai" in s or "generated" in s for s in dir_parts):
+            if any(
+                "aiartdata" in s or "ai" in s or "generated" in s for s in dir_parts
+            ):
                 return "ai"
             return None
 
@@ -266,6 +268,7 @@ def download_data(raw_dir: Path) -> Path:
     print(f"Copied {copied_ai} AI images and {copied_human} Human images to {raw_dir}.")
     return dataset_path
 
+
 """
 def prepare_data(
     raw_dir: Path = typer.Option(Path("data/raw"), help="Raw data directory containing 'ai' and 'human' subfolders"),
@@ -275,6 +278,8 @@ def prepare_data(
     seed: int = typer.Option(42, help="Shuffle seed"),
 ) -> None:
 """
+
+
 def prepare_data(
     raw_dir: Path = Path("data/raw"),
     processed_dir: Path = Path("data/processed"),
@@ -287,7 +292,9 @@ def prepare_data(
 
     # check if raw dir exists
     if not raw_dir.exists():
-        print(f"Raw directory {raw_dir} not found — creating and downloading Kaggle dataset...")
+        print(
+            f"Raw directory {raw_dir} not found — creating and downloading Kaggle dataset..."
+        )
         raw_dir.mkdir(parents=True, exist_ok=True)
         download_data(raw_dir)
 

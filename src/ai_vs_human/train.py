@@ -8,8 +8,7 @@ from pathlib import Path
 import os
 
 
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2] # Adjusted to point to project root
+PROJECT_ROOT = Path(__file__).resolve().parents[2]  # Adjusted to point to project root
 
 
 def _wandb_setup() -> None:
@@ -45,17 +44,17 @@ def _wandb_setup() -> None:
         wandb.login()
 
 
-
- # Accuracy calculation
+# Accuracy calculation
 def _binary_accuracy_from_logits(logits: torch.Tensor, labels: torch.Tensor) -> float:
     """Accuracy for BCEWithLogitsLoss (binary classification)."""
     probs = torch.sigmoid(logits)
     preds = (probs > 0.5).long()
     return (preds == labels.long()).float().mean().item()
 
+
 def train(config: dict | None = None):
     """Train the model with hyperparameters from config or defaults.
-    
+
     Args:
         config: Optional dict with hyperparameters. If None, uses defaults.
                 When run in a sweep, wandb.init() provides wandb.config.
@@ -66,15 +65,16 @@ def train(config: dict | None = None):
     from ai_vs_human.data import prepare_data
 
     from pathlib import Path
+
     prepare_data(raw_dir=Path("data/raw"), processed_dir=Path("data/processed"))
-    
+
     # Initialize the W&B run (sweep or standalone)
     run = wandb.init(
         project=os.getenv("WANDB_PROJECT", "MLOps_project"),
         entity=os.getenv("WANDB_ENTITY"),
         config=config or {"lr": 1e-4, "batch_size": 64, "epochs": 2},
     )
-    
+
     # Get hyperparameters from wandb.config (works for both sweeps and regular runs)
     cfg = wandb.config
     lr = cfg.lr
@@ -89,7 +89,11 @@ def train(config: dict | None = None):
 
     model = get_model()
     device = torch.device(
-        "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+        "cuda"
+        if torch.cuda.is_available()
+        else "mps"
+        if torch.backends.mps.is_available()
+        else "cpu"
     )
     model = model.to(device)
 
@@ -97,7 +101,9 @@ def train(config: dict | None = None):
     wandb.watch(model, log="all", log_freq=100)
 
     # Only parameters that require gradients are optimized
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
+    optimizer = torch.optim.Adam(
+        filter(lambda p: p.requires_grad, model.parameters()), lr=lr
+    )
 
     # Loss function for binary classification
     criterion = torch.nn.BCEWithLogitsLoss()
@@ -154,16 +160,23 @@ def train(config: dict | None = None):
                         pass
 
                     grads = torch.cat(
-                        [p.grad.flatten() for p in model.parameters() if p.grad is not None],
+                        [
+                            p.grad.flatten()
+                            for p in model.parameters()
+                            if p.grad is not None
+                        ],
                         0,
                     )
                     wandb.log({"gradients": wandb.Histogram(grads)}, step=global_step)
 
             epoch_loss = running_loss / max(n_batches, 1)
             epoch_acc = running_acc / max(n_batches, 1)
-            print(f"Epoch {epoch+1}/{epochs}, Loss: {epoch_loss:.4f}, Acc: {epoch_acc:.4f}")
+            print(
+                f"Epoch {epoch+1}/{epochs}, Loss: {epoch_loss:.4f}, Acc: {epoch_acc:.4f}"
+            )
             wandb.log(
-                {"train/epoch_loss": epoch_loss, "train/epoch_acc": epoch_acc}, step=global_step
+                {"train/epoch_loss": epoch_loss, "train/epoch_acc": epoch_acc},
+                step=global_step,
             )
 
         # Save + artifact
@@ -178,13 +191,15 @@ def train(config: dict | None = None):
         artifact.add_file(str(ckpt_path))
         run.log_artifact(artifact)
 
-        ENTITY = "MLOps model"                 # Registry name
+        ENTITY = "MLOps model"  # Registry name
         COLLECTION_NAME = "ai_vs_human_model"  # Collection name
 
-        #Directly linkning the artifact to the model registry
-        run.link_artifact(artifact, f"wandb-registry-{ENTITY}/{COLLECTION_NAME}",
-                          aliases=["latest"],
-                          )
+        # Directly linkning the artifact to the model registry
+        run.link_artifact(
+            artifact,
+            f"wandb-registry-{ENTITY}/{COLLECTION_NAME}",
+            aliases=["latest"],
+        )
 
     finally:
         wandb.finish()
