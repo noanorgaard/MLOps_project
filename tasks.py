@@ -63,3 +63,29 @@ def build_docs(ctx: Context) -> None:
 def serve_docs(ctx: Context) -> None:
     """Serve documentation."""
     ctx.run("uv run mkdocs serve --config-file docs/mkdocs.yaml", echo=True, pty=not WINDOWS)
+
+
+# Load testing commands
+@task
+def load_test_locust(ctx: Context, host: str = "http://localhost:8000", users: int = 50, rate: int = 5, time: str = "2m") -> None:
+    """Run Locust load test in headless mode.
+    
+    Args:
+        host: API host URL
+        users: Number of concurrent users to simulate
+        rate: User spawn rate per second
+        time: Test duration (e.g., '2m', '30s', '1h')
+    """
+    ctx.run(
+        f"uv run locust -f tests/loadtests/locustfile.py --host={host} "
+        f"--users {users} --spawn-rate {rate} --run-time {time} "
+        f"--headless --html reports/load_test_report.html",
+        echo=True,
+        pty=not WINDOWS,
+    )
+
+
+@task
+def load_test_locust_web(ctx: Context, host: str = "http://localhost:8000") -> None:
+    """Start Locust web interface for interactive load testing."""
+    ctx.run(f"uv run locust -f tests/loadtests/locustfile.py --host={host}", echo=True, pty=not WINDOWS)
