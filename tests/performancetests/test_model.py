@@ -31,7 +31,7 @@ def load_model():
     # Use non-empty fallbacks even if env vars are defined as empty strings in CI
     entity = os.getenv("WANDB_ENTITY") or "thordeibert-danmarks-tekniske-universitet-dtu"
     project = os.getenv("WANDB_PROJECT") or "MLOps_project"
-    artifact_name = os.getenv("WANDB_ARTIFACT") or "ai_vs_human_model:staging"
+    artifact_name = os.getenv("WANDB_ARTIFACT") or "ai_vs_human_model:latest"
 
     # Construct full artifact path
     artifact_path = f"{entity}/{project}/{artifact_name}"
@@ -50,7 +50,7 @@ def load_model():
     return model
 
 
-# This test will run, whenever at new model with alias 'staging' is pushed to W&B
+# This test will run, whenever at new model with alias 'latest' is pushed to W&B
 # model will test on model with that alias
 def test_model_speed():
     model = load_model()
