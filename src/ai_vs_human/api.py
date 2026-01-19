@@ -30,6 +30,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """FastAPI lifespan handler to load model on startup."""
@@ -142,40 +143,40 @@ def _download_best_sweep_artifact(
 async def prometheus_middleware(request: Request, call_next):
     """Middleware to instrument all HTTP requests with Prometheus metrics."""
     start_time = time.time()
-    
+
     try:
         response = await call_next(request)
         duration = time.time() - start_time
-        
+
         # Track request count and latency
         REQUEST_COUNT.labels(
             method=request.method,
             endpoint=request.url.path,
             status_code=response.status_code,
         ).inc()
-        
+
         REQUEST_LATENCY.labels(
             method=request.method,
             endpoint=request.url.path,
         ).observe(duration)
-        
+
         return response
-    
-    except Exception as e:
+
+    except Exception:
         duration = time.time() - start_time
-        
+
         # Track failed requests
         REQUEST_COUNT.labels(
             method=request.method,
             endpoint=request.url.path,
             status_code=500,
         ).inc()
-        
+
         REQUEST_LATENCY.labels(
             method=request.method,
             endpoint=request.url.path,
         ).observe(duration)
-        
+
         raise
 
 
@@ -211,9 +212,7 @@ async def load_model_from_wandb() -> None:
 
         # Download model: prefer best from sweep if sweep id provided, else use explicit artifact
         if sweep_id:
-            logger.info(
-                "Loading best model from sweep %s using metric '%s'", sweep_id, sweep_metric
-            )
+            logger.info("Loading best model from sweep %s using metric '%s'", sweep_id, sweep_metric)
             artifact_dir = _download_best_sweep_artifact(
                 entity=entity,
                 project=project,
