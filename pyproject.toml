@@ -35,6 +35,10 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "httpx>=0.28.1",
     "prometheus-client>=0.24.1",
+    "evidently>=0.7.20",
+    "scikit-learn>=1.8.0",
+    "pandas>=2.3.3",
+    "transformers>=4.57.6",
 ]
 
 [dependency-groups]
