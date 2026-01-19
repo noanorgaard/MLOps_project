@@ -235,12 +235,12 @@ async def load_model_from_wandb() -> None:
             # Download artifact to temporary directory
             logger.info("Downloading artifact...")
             artifact = run.use_artifact(artifact_path, type="model")
-            artifact_dir = artifact.download()
+            artifact_dir = Path(artifact.download())
 
         logger.info(f"Artifact downloaded to: {artifact_dir}")
 
         # Find model file in artifact
-        model_files = list(Path(artifact_dir).glob("*.pth"))
+        model_files = list(artifact_dir.glob("*.pth"))
         if not model_files:
             raise FileNotFoundError(f"No .pth model file found in artifact at {artifact_dir}")
 
