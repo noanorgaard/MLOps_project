@@ -1,35 +1,33 @@
+import datetime
+import io
 import numpy as np
 import pandas as pd
 import torch
-
+from transformers import CLIPModel, CLIPProcessor
 from evidently.legacy.metrics import DataDriftTable
 from evidently.legacy.report import Report
 
-from transformers import CLIPModel, CLIPProcessor
-
+from google.cloud import storage
 from ai_vs_human.data import MyDataset
 
 
-def extract_features(images: torch.Tensor) -> np.ndarray:
-    if images.ndim == 3:
-        images = images.unsqueeze(1)
+def extract_features(img_chw: np.ndarray) -> dict:
+    gray = img_chw.mean(axis=0)
 
-    x = images.float().numpy()
-    gray = x.mean(axis=1)
+    brightness = float(gray.mean())
+    contrast = float(gray.std())
 
-    brightness = gray.mean(axis=(1, 2))
-    contrast = gray.std(axis=(1, 2))
+    gy, gx = np.gradient(gray, axis=(0, 1))
+    sharpness = float((np.abs(gx) + np.abs(gy)).mean())
 
-    gy, gx = np.gradient(gray, axis=(1, 2))
-    sharpness = (np.abs(gx) + np.abs(gy)).mean(axis=(1, 2))
+    channel_std = float(img_chw.std(axis=0).mean())
 
-    channel_std = x.std(axis=1).mean(axis=(1, 2))
-
-    return np.stack([brightness, contrast, sharpness, channel_std], axis=1)
-
-
-def collect_images(ds) -> torch.Tensor:
-    return torch.stack([ds[i][0] for i in range(len(ds))])
+    return {
+        "brightness": brightness,
+        "contrast": contrast,
+        "sharpness": sharpness,
+        "channel_std": channel_std,
+    }
 
 
 def extract_clip_features(images: torch.Tensor, model, processor, batch_size: int = 16) -> np.ndarray:
@@ -39,12 +37,9 @@ def extract_clip_features(images: torch.Tensor, model, processor, batch_size: in
         images = images.unsqueeze(1)
 
     for i in range(0, images.size(0), batch_size):
-        batch = images[i : i + batch_size]  # [B, C, H, W]
+        batch = images[i : i + batch_size]
 
-        if batch.size(1) == 1:
-            batch = batch.repeat(1, 3, 1, 1)
-
-        batch = batch.permute(0, 2, 3, 1).numpy()  # [B, H, W, C] float in [0,1]
+        batch = batch.permute(0, 2, 3, 1).numpy()
         inputs = processor(images=list(batch), return_tensors="pt")
 
         with torch.no_grad():
@@ -55,12 +50,52 @@ def extract_clip_features(images: torch.Tensor, model, processor, batch_size: in
     return np.concatenate(feats, axis=0)
 
 
-def main():
+def upload_training_features() -> None:
+
+    GCS_BUCKET_NAME = "ai-vs-human-monitoring"
+    GCS_OBJECT_NAME = "reference/features.csv"
+
+    train_ds = MyDataset(train=True)
+
+    rows = []
+    timestamp = datetime.datetime.now(tz=datetime.UTC).isoformat()
+
+    for i in range(len(train_ds)):
+        img = train_ds[i][0]
+        img_np = img.float().numpy()
+
+        features = extract_features(img_np)
+
+        rows.append(
+            {
+                "index": i,
+                "timestamp": timestamp,
+                **features,
+            }
+        )
+
+    df = pd.DataFrame(rows)
+
+    buffer = io.StringIO()
+    df.to_csv(buffer, index=False)
+    buffer.seek(0)
+
+    client = storage.Client()
+    bucket = client.bucket(GCS_BUCKET_NAME)
+    blob = bucket.blob(GCS_OBJECT_NAME)
+
+    blob.upload_from_string(
+        buffer.getvalue(),
+        content_type="text/csv",
+    )
+
+
+def data_drift_train_and_test():
     train_ds = MyDataset(train=True)
     test_ds = MyDataset(train=False)
 
-    train_images = collect_images(train_ds)
-    test_images = collect_images(test_ds)
+    train_images = torch.stack([train_ds[i][0] for i in range(len(train_ds))]) 
+    test_images = torch.stack([test_ds[i][0] for i in range(len(test_ds))]) 
 
     train_manual = extract_features(train_images)
     test_manual = extract_features(test_images)
@@ -85,6 +120,5 @@ def main():
     report.run(reference_data=reference, current_data=current)
     report.save_html("data_drift.html")
 
-
 if __name__ == "__main__":
-    main()
+    upload_training_features()

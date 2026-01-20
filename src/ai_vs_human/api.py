@@ -26,9 +26,10 @@ from fastapi import BackgroundTasks
 from google.cloud import storage
 
 from ai_vs_human.model import get_model
+from ai_vs_human.data_drif import extract_features
 
 GCS_BUCKET_NAME = "ai-vs-human-monitoring" #"mlops-project-22-monitoring" #os.getenv("GCS_BUCKET_NAME", "")
-
+GCS_PREFIX = "prediction"
 
 # Load environment variables from .env file
 load_dotenv()
@@ -145,25 +146,6 @@ def _download_best_sweep_artifact(
     return Path(artifact_dir)
 
 
-def extract_features_1(img_chw: np.ndarray) -> dict:
-    gray = img_chw.mean(axis=0)
-
-    brightness = float(gray.mean())
-    contrast = float(gray.std())
-
-    gy, gx = np.gradient(gray, axis=(0, 1))
-    sharpness = float((np.abs(gx) + np.abs(gy)).mean())
-
-    channel_std = float(img_chw.std(axis=0).mean())
-
-    return {
-        "brightness": brightness,
-        "contrast": contrast,
-        "sharpness": sharpness,
-        "channel_std": channel_std,
-    }
-
-
 def save_to_gcs(data: dict) -> None:
     if not GCS_BUCKET_NAME:
         return
@@ -172,7 +154,7 @@ def save_to_gcs(data: dict) -> None:
     bucket = client.bucket(GCS_BUCKET_NAME)
 
     ts = datetime.datetime.now(tz=datetime.UTC).strftime("%Y%m%d_%H%M%S_%f")
-    blob = bucket.blob(f"pred_{ts}.json")
+    blob = bucket.blob(f"{GCS_PREFIX}/pred_{ts}.json")
     blob.upload_from_string(json.dumps(data), content_type="application/json")
 
 
@@ -347,7 +329,7 @@ async def predict(
         arr = np.clip(arr, 0.0, 1.0)
         arr = np.transpose(arr, (2, 0, 1))  # HWC -> CHW
 
-        features = extract_features_1(arr)
+        features = extract_features(arr)
 
         # Convert to tensor and add batch dimension
         image_tensor = torch.from_numpy(arr).float().unsqueeze(0).to(device)
