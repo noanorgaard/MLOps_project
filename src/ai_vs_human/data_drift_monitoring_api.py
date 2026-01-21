@@ -12,7 +12,7 @@ from fastapi.responses import HTMLResponse
 from google.cloud import storage
 
 
-GCS_BUCKET_NAME = "ai-vs-human-monitoring"
+GCS_BUCKET_NAME = "mlops-project-22-monitoring"
 REFERENCE_BLOB = "reference/features.csv"
 PREDICTION_PREFIX = "prediction/"
 
