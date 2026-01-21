@@ -59,7 +59,7 @@ def download_latest_predictions_to_dir(bucket_name: str, prefix: str, n: int, di
         return
 
     for blob in blobs:
-        filename = os.path.basename(blob.name) 
+        filename = os.path.basename(blob.name)
         local_path = directory / filename
         blob.download_to_filename(str(local_path))
 

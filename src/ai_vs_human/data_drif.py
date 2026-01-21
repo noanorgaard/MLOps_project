@@ -51,7 +51,6 @@ def extract_clip_features(images: torch.Tensor, model, processor, batch_size: in
 
 
 def upload_training_features() -> None:
-
     GCS_BUCKET_NAME = "ai-vs-human-monitoring"
     GCS_OBJECT_NAME = "reference/features.csv"
 
@@ -94,8 +93,8 @@ def data_drift_train_and_test():
     train_ds = MyDataset(train=True)
     test_ds = MyDataset(train=False)
 
-    train_images = torch.stack([train_ds[i][0] for i in range(len(train_ds))]) 
-    test_images = torch.stack([test_ds[i][0] for i in range(len(test_ds))]) 
+    train_images = torch.stack([train_ds[i][0] for i in range(len(train_ds))])
+    test_images = torch.stack([test_ds[i][0] for i in range(len(test_ds))])
 
     train_manual = extract_features(train_images)
     test_manual = extract_features(test_images)
@@ -119,6 +118,7 @@ def data_drift_train_and_test():
     report = Report(metrics=[DataDriftTable()])
     report.run(reference_data=reference, current_data=current)
     report.save_html("data_drift.html")
+
 
 if __name__ == "__main__":
     upload_training_features()

@@ -28,7 +28,7 @@ from google.cloud import storage
 from ai_vs_human.model import get_model
 from ai_vs_human.data_drif import extract_features
 
-GCS_BUCKET_NAME = "ai-vs-human-monitoring" #"mlops-project-22-monitoring" #os.getenv("GCS_BUCKET_NAME", "")
+GCS_BUCKET_NAME = "ai-vs-human-monitoring"  # "mlops-project-22-monitoring" #os.getenv("GCS_BUCKET_NAME", "")
 GCS_PREFIX = "prediction"
 
 # Load environment variables from .env file

@@ -8,9 +8,9 @@ image_path = "/home/mattias/dtu/mlops/MLOps_project/data/raw/ai/_a_peaceful_coun
 with open(image_path, "rb") as f:
     files = {
         "file": (
-            "image.png",   # filename
-            f,             # file object
-            "image/png",   # content type (IMPORTANT)
+            "image.png",  # filename
+            f,  # file object
+            "image/png",  # content type (IMPORTANT)
         )
     }
     resp = requests.post(url, files=files)
