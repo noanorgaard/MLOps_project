@@ -396,7 +396,22 @@ Overall, combining these metrics with logged images gives us a good overview of 
 >
 Answer:
 
---- question 15 fill here ---
+In our project, we used Docker to containerize different parts of the project. We created separate Docker images for model training and for inference through an API, which helped ensure that our code and dependencies behaved consistently across different environments.
+
+Docker was particularly useful when deploying to the cloud. We automatically built the images and pushed them to an artifact registry repository. From there, we were able to do things like start compute engine instances that pulled and ran the Docker containers directly from the registry. This allowed us to train the model in the cloud using the same containerized setup that we used during development.
+
+We ran our Docker images using commands such as docker run <image_name>:latest, passing in configuration parameters when needed (e.g., API keys or for mounting folders).
+
+Example for running training docker image:
+docker run --rm \
+  -e WANDB_API_KEY="$WANDB_API_KEY" \
+  -v "$(pwd)/data:/data" \
+  -v "$(pwd)/models:/models" \
+  -w / \
+  trainer:latest
+
+Dockerfile:
+https://github.com/noanorgaard/MLOps_project/blob/main/dockerfiles/train.dockerfile
 
 ### Question 16
 
@@ -409,9 +424,12 @@ Answer:
 > *Debugging method was dependent on group member. Some just used ... and others used ... . We did a single profiling*
 > *run of our main code at some point that showed ...*
 >
-Answer:
+> Answer:
+As a group, we primarily used VS Code as our development environment, and the built-in VS Code debugger was our main tool for debugging. This allowed us to step through the code, set breakpoints, and inspect variables at runtime, which helped us identify and fix issues efficiently. We encountered many bugs during development, especially when integrating code written by different group members. The debugger was particularly useful in these situations, as it helped us understand how different components interacted and where errors were introduced.
 
---- question 16 fill here ---
+In addition to interactive debugging, we relied on print statements and logging for quick checks when debugging simpler issues or when running code inside Docker containers. We did not perform extensive profiling, but we profiled the training script using cProfile and found that most of the runtime was spent on PyTorch serialization (saving/loading models), while the actual training computation took significantly less time.
+
+![Buckets overview](figures/profiling_train.png)
 
 ## Working in the cloud
 
