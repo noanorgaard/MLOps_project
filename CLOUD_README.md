@@ -306,6 +306,7 @@ Common causes:
 - Prefer Secret Manager for `WANDB_API_KEY`.
 - Principle of least privilege:
   - Drift service: `roles/storage.objectViewer`
+
   - Inference service: `roles/storage.objectCreator` (+ viewer if you later need reads)
 
 ## Course alignment (M27)
