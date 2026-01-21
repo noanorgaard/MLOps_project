@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 from ai_vs_human.model import get_model
 from ai_vs_human.data import MyDataset
+from zeus.monitor import ZeusMonitor
 
 import wandb
 from pathlib import Path
@@ -59,6 +60,7 @@ def train(config: dict | None = None):
         config: Optional dict with hyperparameters. If None, uses defaults.
                 When run in a sweep, wandb.init() provides wandb.config.
     """
+
     (PROJECT_ROOT / "models").mkdir(exist_ok=True)
     _wandb_setup()
 
@@ -107,15 +109,20 @@ def train(config: dict | None = None):
     print(f"Model: {model.__class__.__name__}, Device: {device}")
     print("Initiating training loop...")
 
+    monitor = ZeusMonitor(gpu_indices=torch.cuda.current_device() if torch.cuda.is_available() else None)
+
     try:
         for epoch in range(epochs):
+            monitor.begin_window("epoch")
             model.train()  # Set mode to training (enables dropout/batchnorm)
             print(f"Starting epoch {epoch+1}/{epochs}...")
             running_loss = 0.0
             running_acc = 0.0
             n_batches = 0
 
+            steps = []
             for i, (images, labels) in enumerate(trainloader):
+                monitor.begin_window("train_step")
                 images, labels = images.to(device), labels.to(device)
 
                 optimizer.zero_grad()
@@ -127,6 +134,8 @@ def train(config: dict | None = None):
 
                 loss.backward()
                 optimizer.step()
+                result = monitor.end_window("train_step")
+                steps.append(result)
 
                 # Metrics
                 with torch.no_grad():
@@ -159,12 +168,24 @@ def train(config: dict | None = None):
                     )
                     wandb.log({"gradients": wandb.Histogram(grads.cpu().numpy().tolist())}, step=global_step)
 
+            mes = monitor.end_window("epoch")
+            print(f"Epoch {epoch} consumed {mes.time} s and {mes.total_energy} J.")
+
+            avg_time = sum(map(lambda m: m.time, steps)) / len(steps)
+            avg_energy = sum(map(lambda m: m.total_energy, steps)) / len(steps)
+            print(f"One step took {avg_time} s and {avg_energy} J on average.")
+
             # Epoch metrics
             epoch_loss = running_loss / max(n_batches, 1)
             epoch_acc = running_acc / max(n_batches, 1)
             print(f"Epoch {epoch+1}/{epochs}, Loss: {epoch_loss:.4f}, Acc: {epoch_acc:.4f}")
             wandb.log(
-                {"train/epoch_loss": epoch_loss, "train/epoch_acc": epoch_acc},
+                {
+                    "train/epoch_loss": epoch_loss,
+                    "train/epoch_acc": epoch_acc,
+                    "train/epoch_time": mes.time,
+                    "train/epoch_energy": mes.total_energy,
+                },
                 step=global_step,
             )
 

@@ -543,7 +543,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 >
 > Answer:
 
---- question 28 fill here ---
+Yes, we implemented energy consumption monitoring using Zeus during model training. Zeus is a framework that tracks GPU energy usage in real-time, providing insights into the environmental and computational cost of training runs. We integrated Zeus into our training pipeline to measure the energy consumed by each training session. This gave us visibility into how much power our experiments used, which is important for understanding the carbon footprint and operational costs of model training, especially when scaling up or running hyperparameter sweeps. By monitoring energy consumption, we could identify more efficient training configurations and make informed decisions about trade-offs between model performance and resource usage.
 
 ### Question 29
 
