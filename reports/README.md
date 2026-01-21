@@ -355,8 +355,15 @@ Answer:
 > *As seen in the second image we are also tracking ... and ...*
 >
 Answer:
+We use Weights & Biases (W&B) to keep track of our experiments and compare different training runs within the same project. As shown in the first screenshot, we log the training loss over steps and epochs for multiple runs, including hyperparameter sweeps. Loss is an important metric because it shows how well the model is learning and how quickly it converges for different configurations.
 
---- question 14 fill here ---
+Besides loss, we also track the number of epochs and training steps for each run. This makes it easier to compare experiments fairly, especially in sweeps where some runs may train longer than others. Looking at loss together with epochs helps us understand whether better results come from better learning or simply from longer training, and it can also hint at overfitting.
+
+We also log training accuracy and validation accuracy. Training accuracy shows how well the model fits the training data, while validation accuracy tells us how well it generalizes to unseen data. Comparing these two metrics helps us spot overfitting or underfitting and decide if we need changes like early stopping or different hyperparameters.
+
+Finally, we log image artifacts during training, as seen in the media panel. These images let us visually check what the model is producing and can reveal issues that are not always obvious from just numbers.
+
+Overall, combining these metrics with logged images gives us a good overview of how the model behaves and helps us compare experiments in a structured way.
 
 ### Question 15
 
@@ -606,7 +613,17 @@ Yes, we implemented energy consumption monitoring using Zeus during model traini
 >
 Answer:
 
---- question 29 fill here ---
+The figure shows the overall architecture of our system and how the different tools are connected.
+
+The workflow starts on the developer’s local machine, where we work with the code and the data. The data is tracked using DVC, which helps with versioning datasets and keeping experiments reproducible. From the local setup, we run the training pipeline, which includes training, evaluation, and visualization scripts.
+
+During training, we use Weights & Biases (W&B) to log metrics such as loss and accuracy, along with model artifacts and images. We also run hyperparameter sweeps in W&B to test different configurations and compare results. The trained models are stored as artifacts, and the best or most recent model can later be selected for deployment.
+
+When code is pushed to the GitHub repository, it automatically triggers GitHub Actions. The CI pipeline runs tests and checks the code, and if everything passes, a Docker image is built. This image is pushed to a container registry and used to deploy the model as an API service.
+
+Users interact with the system through the API, which loads the selected trained model and returns predictions. Overall, this setup connects development, experimentation, testing, and deployment in a structured and automated way.
+
+The final part of interaction between the user and docker/API is not fully realized, and requires some manual input for certain aspects. Additionally, the API key for wandb is not integrated into the system completely, and needs a local environment variable to be set to acces certain artifacts.
 
 ### Question 30
 
@@ -639,7 +656,7 @@ Answer:
 Answer:
 
 Student s201920 was in charge of developing of setting up the initial cookie cutter project and setting up and configuring the API and configuring the connection to wandb.
-Student s214458,
+Student s214458, was in charge of implementing wandb logging and sweeping and major changes to train.py.
 Student s221336 was in charge of setting up DVC with GCP for the project. They was also responsible for configuring the contionous integration setup to run tests on pull requests and pushes to main. Finally they implemented the tests on staged models workflow and integrated the Zeus framework for monitoring energy consumption during training.
 Student s250702,
 Student s194504, was in charge of training our models in the cloud and deploying them afterwards.
