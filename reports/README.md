@@ -214,7 +214,9 @@ Deviations from the vanilla template: added `configs/` for sweep settings for W&
 >
 Answer:
 
---- question 6 fill here ---
+We used Ruff for both linting and formatting our code. Ruff is a fast Python linter that enforces PEP8 standards and automatically formats code to maintain consistency. For type checking, we implemented mypy to validate type hints throughout our codebase. Documentation was handled through Google-style docstrings for all functions and classes. These tools are integrated into our CI/CD pipeline through GitHub Actions and pre-commit hooks, ensuring code quality checks run automatically before code is merged.
+
+These concepts are critical in larger projects for several reasons. Code formatting ensures consistency across the codebase, making it easier for team members to read and understand each other's code. Linting catches potential bugs and code smells early in development. Type hints with mypy provide compile-time error detection, reducing runtime errors and making the code self-documenting. Good documentation through docstrings helps new team members quickly understand function purposes and expected inputs/outputs. Together, these practices reduce technical debt, improve collaboration, and make the codebase more maintainable as it scales.
 
 ## Version control
 
@@ -233,7 +235,7 @@ Answer:
 >
 Answer:
 
---- question 7 fill here ---
+We implemented 32 tests across multiple test suites. Our unit tests cover data loading and preprocessing functionality (test_data.py), model architecture and forward pass behavior (test_model.py), and API endpoints including root, health, and prediction endpoints (test_api.py). We also have integration tests that verify end-to-end API functionality with a running server, performance tests that measure model inference speed against defined thresholds, and load tests using Locust to validate API performance under concurrent requests. These tests ensure our data pipeline, model, and API work correctly both individually and together.
 
 ### Question 8
 
@@ -263,7 +265,9 @@ Answer:
 >
 Answer:
 
---- question 9 fill here ---
+Yes, we made extensive use of branches and pull requests in our workflow. Each team member created a new branch when implementing a new feature or fixing a bug. Once coding was complete, the member would pull the latest changes from main and merge them into their branch to ensure compatibility. After pushing their changes, they would create a pull request to merge into main. GitHub Actions automatically ran our test suite on each pull request, and merging was only allowed if all tests passed successfully.
+
+For smaller changes, team members could skip pulling main first and create the pull request directly. GitHub would indicate whether the merge could happen automatically. If merge conflicts arose, the member would resolve them before proceeding. This workflow ensured code quality through automated testing, prevented breaking changes from reaching main, and provided visibility into what each team member was working on through the pull request interface.
 
 ### Question 10
 
@@ -278,7 +282,9 @@ Answer:
 >
 Answer:
 
---- question 10 fill here ---
+Yes. We used DVC to keep all team members on the exact same dataset. Any data curation steps (e.g., removing bad samples) were versioned so cloud training always pulled the latest validated data. DVC stored large files in remote storage while Git tracked only small metadata, so we could `dvc pull`/`dvc push` without bloating the repo.
+
+In CI and unit tests we ran `dvc pull`, allowing tests to use the real dataset automatically instead of relying on mock data. This avoided passing data files around manually, reduced “works on my machine” drift, and kept a clear lineage of which data version was used for each run. Overall, DVC gave us reproducible data access locally, in CI, and when training in the cloud.
 
 ### Question 11
 
@@ -295,7 +301,9 @@ Answer:
 >
 Answer:
 
---- question 11 fill here ---
+We split CI by job so it is clear and fast, and we run it on every push/PR to main. Linting lives in [./github/workflows/linting.yaml](.github/workflows/linting.yaml): `uv sync` (with cache) installs deps, then ruff lint/format checks and mypy run. Unit tests are in [./github/workflows/unit_tests.yaml](.github/workflows/unit_tests.yaml) with a matrix over Ubuntu/Windows/macOS and Python 3.12/3.13; after GCP auth we `dvc pull` to get the tracked dataset, then run pytest with coverage. Integration tests in [./github/workflows/integration_tests.yaml](.github/workflows/integration_tests.yaml) do the same to exercise the API end-to-end across OS/Python. For staged models we have a repository_dispatch workflow that pulls a W&B artifact and runs performance tests: [stage_model.yaml](https://github.com/noanorgaard/MLOps_project/actions/workflows/stage_model.yaml). An example of a triggered workflow can be seen [here](https://github.com/noanorgaard/MLOps_project/actions/runs/21066112061).
+
+We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds platform-specific issues early. We block merges unless ruff, mypy, and tests all pass. Pulling data with DVC inside CI means tests and training always use the same versioned dataset, both locally and in the cloud. Secrets stay in GitHub Secrets (GCP key, W&B key), so workflows can authenticate without hard-coding credentials. Coverage reports run on every test workflow, so we see regressions immediately. By keeping lint, unit, integration, and staged-model checks separate, failures are easy to diagnose and rerun. The repository_dispatch hook lets us test a specific staged model on demand without re-running the whole matrix, which keeps performance checks cheap and targeted.
 
 ## Running code and tracking experiments
 
@@ -417,7 +425,9 @@ Answer:
 >
 Answer:
 
---- question 19 fill here ---
+![Buckets overview](figures/Screenshot%202026-01-21%20at%2010.18.47.png)
+
+![Buckets overview](figures/Screenshot%202026-01-21%20at%2010.23.24.png)
 
 ### Question 20
 
@@ -560,7 +570,7 @@ Answer:
 >
 Answer:
 
---- question 28 fill here ---
+Yes, we implemented energy consumption monitoring using Zeus during model training. Zeus is a framework that tracks GPU energy usage in real-time, providing insights into the environmental and computational cost of training runs. We integrated Zeus into our training pipeline to measure the energy consumed by each training session. This gave us visibility into how much power our experiments used, which is important for understanding the carbon footprint and operational costs of model training, especially when scaling up or running hyperparameter sweeps. By monitoring energy consumption, we could identify more efficient training configurations and make informed decisions about trade-offs between model performance and resource usage.
 
 ### Question 29
 

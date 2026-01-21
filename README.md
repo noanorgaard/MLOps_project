@@ -42,6 +42,7 @@ The directory structure of the project looks like this:
 │   └── workflows/
 │       └── tests.yaml
 ├── configs/                  # Configuration files
+│   └── sweep_config.yaml
 ├── data/                     # Data directory
 │   ├── processed
 │   └── raw
@@ -53,6 +54,8 @@ The directory structure of the project looks like this:
 │   └── source/
 │       └── index.md
 ├── models/                   # Trained models
+│   ├── checkpoint.pth
+│   └── final_model.pth
 ├── notebooks/                # Jupyter notebooks
 ├── reports/                  # Reports
 │   └── figures/
@@ -61,12 +64,16 @@ The directory structure of the project looks like this:
 │   │   ├── __init__.py
 │   │   ├── api.py
 │   │   ├── data.py
+│   │   ├── download_best_model.py
 │   │   ├── evaluate.py
-│   │   ├── models.py
+│   │   ├── model.py
+│   │   ├── sweep.py
 │   │   ├── train.py
 │   │   └── visualize.py
 └── tests/                    # Tests
 │   ├── __init__.py
+│   ├── integrationtests/
+│   │   └── test_apis.py
 │   ├── loadtests/           # Load testing suite
 │   │   ├── locustfile.py
 │   │   ├── test_load.py
@@ -78,6 +85,7 @@ The directory structure of the project looks like this:
 │   │   └── test_model.py
 ├── .gitignore
 ├── .pre-commit-config.yaml
+├── cloudbuild.yaml
 ├── LICENSE
 ├── pyproject.toml            # Python project file
 ├── README.md                 # Project README
