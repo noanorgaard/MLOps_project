@@ -449,7 +449,7 @@ Answer:
 >
 Answer:
 
-![alt text](image-3.png)-
+![alt text](figures/image-3.png)-
 
 ### Question 21
 
@@ -457,8 +457,8 @@ Answer:
 > **your project. You can take inspiration from [this figure](figures/build.png).**
 >
 Answer:
-![alt text](image-1.png)
-![alt text](image-2.png)
+![alt text](figures/image-1.png)
+![alt text](figures/image-2.png)
 
 A common(fælles) project was used aswell personals (therefore the two images) 
 
