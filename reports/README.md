@@ -405,8 +405,8 @@ We ran our Docker images using commands such as docker run <image_name>:latest, 
 Example for running training docker image:
 docker run --rm \
   -e WANDB_API_KEY="$WANDB_API_KEY" \
-  -v "$(pwd)/data:/data" \
-  -v "$(pwd)/models:/models" \
+  -v "\$(pwd)/data:/data" \
+  -v "\$(pwd)/models:/models" \
   -w / \
   trainer:latest
 
