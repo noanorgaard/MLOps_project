@@ -519,7 +519,9 @@ A common(fælles) project was used aswell personals (therefore the two images)
 >
 Answer:
 
-We trained the model in cloud using the engine. The training was done through the linux based Compute engine vitual machine. Here we ran our training script and made the data availeble by mounting the data it from the cloud storage(bucket) on which allowed us to train without altering the training code.
+We trained the model in the cloud using Compute Engine. The training was done  with Linux-based Compute Engine virtual machine where we ran our existing training script directly. The training data was made available to the VM by mounting it from Cloud Storage, which allowed the code to access the data in the same way as in a local setup. This meant that the training could be moved to the cloud without altering the training code itself.
+Using a Compute Engine VM gave us full control over the execution environment, including dependencies and runtime configuration, which was useful during development and debugging. 
+
 
 
 ## Deployment
@@ -554,7 +556,7 @@ The app runs locally with `uv run uvicorn ai_vs_human.api:app --reload` or via t
 >
 Answer:
 
-We containerized the FastAPI service with api.dockerfile and run it locally via `docker run -p 8000:8000 api:latest` after building. In GCP we used Cloud Build + Artifact Registry to build/push the image, then deployed to Cloud Run with the `WANDB_API_KEY` and artifact parameters as env vars. Invocation: `curl -X POST -F "file=@sample.jpg" https://ai-vs-human-api-onyhgpfxqq-ew.a.run.app/predict` returns the class and confidence. For local dev, `uv run uvicorn ai_vs_human.api:app --host 0.0.0.0 --port 8000 --reload` works with a `.env` containing `WANDB_API_KEY`.
+We containerized the FastAPI service with api.dockerfile and run it locally via `docker run -p 8000:8000 api:latest` after building. n GCP, we used Cloud Build together with Artifact Registry to build and store the Docker image. This ensured consistent versioning. The container was then deployed to Cloud Run, where environment variables such as WANDB_API_KEY and artifact-related parameters were injected at runtime, avoiding hard-coded secrets.The deployed inference API can be invoked via an HTTP request, for example using curl, which returns the predicted class and confidence score. For local development, we ran the service directly with Uvicorn using uv, loading required environment variables from a .env file to mirror the cloud setup as closely as possible.
 
 
 
