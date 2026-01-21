@@ -148,7 +148,7 @@ s201920, s214458, s221336, s250702 , s194504
 >
 Answer:
 
-We didn't end up using any third-party frameworks, apart from `kagglehub`, this was used in `data.py` to automatically download our data rather than manually downloading it, which contributes to reproducibility.
+Yes, we implemented energy consumption monitoring using Zeus during model training. Zeus is a framework that tracks GPU energy usage in real-time, providing insights into the environmental and computational cost of training runs. We integrated Zeus into our training pipeline to measure the energy consumed by each training session. This gave us visibility into how much power our experiments used, which is important for understanding the carbon footprint and operational costs of model training, especially when scaling up or running hyperparameter sweeps. By monitoring energy consumption, we could identify more efficient training configurations and make informed decisions about trade-offs between model performance and resource usage. Also `kagglehub`, this was used in `data.py` to automatically download our data rather than manually downloading it, which contributes to reproducibility.
 
 ## Coding environment
 
@@ -448,9 +448,9 @@ Answer:
 
 We used virtual machines for training of the model, and uploaded the resulting model to WandB.
 
-We used the artifact registry to store our docker images, that could then be run with Cloud run. This combination we used to deploy our inference api, and the resulting prediction was stored in a Bucket. We also used this combo for deploying our drift api, that read the predictions(created through the inference API) from the bucket. 
+We used the artifact registry to store our docker images, that could then be run with Cloud run. This combination we used to deploy our inference api, and the resulting prediction was stored in a Bucket. We also used this combo for deploying our drift api, that read the predictions(created through the inference API) from the bucket.
 
-Buckets was also used to store training data. 
+Buckets was also used to store training data.
 
 ### Question 18
 
@@ -472,7 +472,7 @@ we used the VM type `n1-standard-4` (4 vCPUs and ~15 GB RAM). We did not manage 
 The vm was used image classifier training runs and for logging artifacts/metrics to Weights & Biases. The container image
 was built in Cloud Build, stored in Artifact Registry, and then referenced from the job spec (see `config_cpu.yaml`).
 
-For deployment of our inference and drift API's we used Cloud Run, that does not specify the VM type as it runs it automatically by itself. 
+For deployment of our inference and drift API's we used Cloud Run, that does not specify the VM type as it runs it automatically by itself.
 
 ### Question 19
 
@@ -503,7 +503,7 @@ Answer:
 ![alt text](figures/image-1.png)
 ![alt text](figures/image-2.png)
 
-A common(fælles) project was used aswell personals (therefore the two images) 
+A common(fælles) project was used aswell personals (therefore the two images)
 
 
 ### Question 22
@@ -520,7 +520,7 @@ A common(fælles) project was used aswell personals (therefore the two images)
 Answer:
 
 We trained the model in the cloud using Compute Engine. The training was done  with Linux-based Compute Engine virtual machine where we ran our existing training script directly. The training data was made available to the VM by mounting it from Cloud Storage, which allowed the code to access the data in the same way as in a local setup. This meant that the training could be moved to the cloud without altering the training code itself.
-Using a Compute Engine VM gave us full control over the execution environment, including dependencies and runtime configuration, which was useful during development and debugging. 
+Using a Compute Engine VM gave us full control over the execution environment, including dependencies and runtime configuration, which was useful during development and debugging.
 
 
 
@@ -634,7 +634,7 @@ Working in the cloud was practical for building and running containers and for s
 >
 Answer:
 
-Yes, we implemented energy consumption monitoring using Zeus during model training. Zeus is a framework that tracks GPU energy usage in real-time, providing insights into the environmental and computational cost of training runs. We integrated Zeus into our training pipeline to measure the energy consumed by each training session. This gave us visibility into how much power our experiments used, which is important for understanding the carbon footprint and operational costs of model training, especially when scaling up or running hyperparameter sweeps. By monitoring energy consumption, we could identify more efficient training configurations and make informed decisions about trade-offs between model performance and resource usage.
+No.
 
 ### Question 29
 
