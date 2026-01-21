@@ -177,7 +177,10 @@ def train(config: dict | None = None):
                         [p.grad.flatten() for p in model.parameters() if p.grad is not None],
                         0,
                     )
-                    wandb.log({"gradients": wandb.Histogram(grads.cpu().numpy().tolist())}, step=global_step)
+                    wandb.log(
+                        {"gradients": wandb.Histogram(grads.cpu().numpy().tolist())},
+                        step=global_step,
+                    )
 
             mes = monitor.end_window("epoch")
             print(f"Epoch {epoch} consumed {mes.time} s and {mes.total_energy} J.")
@@ -245,7 +248,7 @@ def train(config: dict | None = None):
             f"wandb-registry-{ENTITY}/{COLLECTION_NAME}",
             aliases=["latest"],
         )
-        
+
     finally:
         wandb.finish()
 
