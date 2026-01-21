@@ -322,7 +322,13 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 >
 Answer:
 
---- question 12 fill here ---
+We used `invoke` task runner with `uv` to standardize how to run experiments. To run locally: 
+> `uv run invoke train` # runs with defaults (lr=1e-4, batch_size=64, epochs=2)
+
+We use `wandb` as the central hub for hyperparameter management. The `train()` function accepts an optional config dict, which gets passed to `wandb.init()`, and then the hyperparameters are read from `wandb.config`. 
+
+We have also created a `sweep_config.yaml` that defines the sweep space and lets W&B automaticallysample hyperparameter combinations to maximize training accuracy. you can launch a sweep using `wandb sweep configs/sweep_config.yaml`
+
 
 ### Question 13
 
@@ -337,7 +343,17 @@ Answer:
 >
 Answer:
 
---- question 13 fill here ---
+We secure reproducibility through W&B, Git, DVC, and using `uv.lock`.
+
+Whenever an experiment runs, W&B logs the complete config, metrics, model checkpoints, and system info. DVC ensures the exact dataset version is used. The `uv.lock` file locks all dependencies to specific versions.
+
+To reproduce an experiment you should:
+- Clone the repository
+- `uv sync` to restore the exact Python environment from uv.lock
+- `dvc pull` to get the versioned dataset
+- Run `uv run invoke train` (or `wandb sweep` for a specific sweep run)
+
+W&B automatically captures the config, git commit hash, and all hyperparameters, so revisiting a past run shows exactly what parameters and data were used.
 
 ### Question 14
 
@@ -619,4 +635,14 @@ Answer:
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 Answer:
 
---- question 31 fill here ---
+Student s201920 was in charge of developing of setting up the initial cookie cutter project and setting up and configuring the API and configuring the connection to wandb.
+Student s214458, 
+Student s221336, 
+Student s250702, 
+Student s194504, was in charge of training our models in the cloud and deploying them afterwards. 
+
+All members contributed to code by sharing the same Git.
+
+We have used ChatGPT to help debug our code and set up docker files. Additionally, we used GitHub Copilot to help write some of our code and ask about "how to Git".
+
+
