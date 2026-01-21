@@ -696,7 +696,7 @@ Answer:
 Student s201920 was in charge of developing of setting up the initial cookie cutter project and setting up and configuring the API and configuring the connection to wandb.
 Student s214458, was in charge of implementing wandb logging and sweeping and major changes to train.py.
 Student s221336 was in charge of setting up DVC with GCP for the project. They was also responsible for configuring the contionous integration setup to run tests on pull requests and pushes to main. Finally they implemented the tests on staged models workflow and integrated the Zeus framework for monitoring energy consumption during training.
-Student s250702,
+Student s250702 was in charge of cloud setup for GCP services, data-drift monitoring, API development, Docker integration with GCP, and testing and profiling.
 Student s194504, was in charge of training our models in the cloud and deploying them afterwards.
 
 All members contributed to code by sharing the same Git.
