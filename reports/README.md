@@ -235,7 +235,7 @@ We implemented 32 tests across multiple test suites. Our unit tests cover data l
 >
 > Answer:
 
---- question 8 fill here ---
+Our current test coverage is 23% across the codebase. Major gaps are in API request/response paths, dataset preprocessing branches, drift monitoring code, and training/evaluation scripts, which currently sit at low or 0% coverage. Even with 100% coverage we would not assume the code is bug-free: coverage only shows lines executed, not that outputs or edge cases are correct. If a function or class has 100% test coverage it just means that the edge cases that are handled, have tests. It does not mean that all edge cases are handled. The easiest way to achieve 100% test coverage is to handle any edge cases at all (or not even write any code at all). High-value tests must assert behavior (outputs, error handling, performance thresholds) and include integration paths.
 
 ### Question 9
 
