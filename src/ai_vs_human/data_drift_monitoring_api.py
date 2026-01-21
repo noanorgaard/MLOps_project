@@ -7,15 +7,20 @@ import anyio
 import pandas as pd
 from evidently.legacy.metrics import DataDriftTable
 from evidently.legacy.report import Report
-from fastapi import FastAPI
-from fastapi import HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from google.cloud import storage
+from typing import Optional
+
+from fastapi.responses import HTMLResponse
+from google.cloud import storage
+from typing import Optional
 
 
 GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME", "ai-vs-human-monitoring")
 REFERENCE_BLOB = os.getenv("REFERENCE_BLOB", "reference/features.csv")
 PREDICTION_PREFIX = os.getenv("PREDICTION_PREFIX", "prediction/")
+
 
 REPORT_PATH = "data_drift_report.html"
 PRED_CACHE_DIR = Path("./pred_cache")
@@ -103,6 +108,11 @@ def run_drift_report(reference: pd.DataFrame, current: pd.DataFrame, out_path: s
     report.save_html(out_path)
 
 
+# Keeps mypy happy about global scope variables
+training_reference: Optional[pd.DataFrame] = None
+feature_columns: Optional[List[str]] = None
+
+
 async def lifespan(app: FastAPI):
     """Load reference data once at startup."""
     global training_reference, feature_columns, reference_load_error
@@ -127,8 +137,9 @@ async def lifespan(app: FastAPI):
     yield
 
     training_reference = None
-    feature_columns = []
+    feature_columns = None
     reference_load_error = None
+
 
 
 app = FastAPI(lifespan=lifespan)
@@ -151,15 +162,15 @@ async def health() -> Dict[str, Any]:
 @app.get("/report", response_class=HTMLResponse)
 async def get_report(n: int = 50):
     """Generate and return the report."""
-    if training_reference is None or reference_load_error:
-        raise HTTPException(
-            status_code=503,
-            detail=(
-                "Reference data not available. "
-                "Check that the GCS object exists and that the Cloud Run service account has roles/storage.objectViewer. "
-                f"Current error: {reference_load_error}"
-            ),
-        )
+    if training_reference is None or feature_columns is None or reference_load_error:
+         raise HTTPException(
+          status_code=503,
+          detail=(
+            "Reference data not available. "
+            "Check that the GCS object exists and that the Cloud Run service account has roles/storage.objectViewer. "
+            f"Current error: {reference_load_error}"
+        ),)
+
 
     download_latest_predictions_to_dir(
         bucket_name=GCS_BUCKET_NAME,

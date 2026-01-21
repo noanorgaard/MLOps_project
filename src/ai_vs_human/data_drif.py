@@ -7,9 +7,12 @@ import torch
 from transformers import CLIPModel, CLIPProcessor
 from evidently.legacy.metrics import DataDriftTable
 from evidently.legacy.report import Report
-
+from typing import List
 from google.cloud import storage
 from ai_vs_human.data import MyDataset
+
+GCS_BUCKET_NAME = "mlops-project-22-monitoring"
+GCS_OBJECT_NAME = "reference/features.csv"
 
 
 def extract_features(img_chw: np.ndarray) -> dict:
@@ -31,8 +34,8 @@ def extract_features(img_chw: np.ndarray) -> dict:
     }
 
 
-def extract_clip_features(images: torch.Tensor, model, processor, batch_size: int = 16) -> np.ndarray:
-    feats = []
+def extract_clip_features(images: torch.Tensor, model, processor, batch_size: int = 16) -> torch.Tensor:
+    feats: List[torch.Tensor] = []
 
     if images.ndim == 3:
         images = images.unsqueeze(1)
@@ -40,15 +43,16 @@ def extract_clip_features(images: torch.Tensor, model, processor, batch_size: in
     for i in range(0, images.size(0), batch_size):
         batch = images[i : i + batch_size]
 
-        batch = batch.permute(0, 2, 3, 1).numpy()
+        # If processor accepts torch tensors directly, prefer this:
+        batch = batch.permute(0, 2, 3, 1)  # still Tensor
         inputs = processor(images=list(batch), return_tensors="pt")
 
         with torch.no_grad():
-            emb = model.get_image_features(inputs["pixel_values"])
+            emb = model.get_image_features(inputs["pixel_values"])  # Tensor
 
-        feats.append(emb.numpy())
+        feats.append(emb)
 
-    return np.concatenate(feats, axis=0)
+    return torch.cat(feats, dim=0)
 
 
 def upload_training_features() -> None:
