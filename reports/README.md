@@ -677,7 +677,16 @@ The final part of interaction between the user and docker/API is not fully reali
 >
 Answer:
 
---- question 30 fill here ---
+The biggest challenges in the project were:
+
+(1) It was difficut to handle Git workflow and collaboration using Git. we had some trouble understanding merge conflicts, resolving branches, and coordinating pull requests across the team took significant time. Different team members had varying Git experience levels, which led to confusion around when to rebase vs merge, how to handle diverged branches, and resolving conflicts when multiple people edited the same files. We spent hours debugging "why won't my code merge?" and explaining branch strategies between us.
+But we solved this using co-pilot, as it is very good at guiding us, we were very happy to have the AGENT.md file.
+
+(2) It took a significant amount of time to compile and deploy Docker images on the cloud. Cloud Build would sometimes timeout or fail silently, and debugging build issues was difficult without clear error messages. Additionally, managing GCP buckets for data and model artifacts proved challenging. We initially intended to use a shared bucket for the entire team, but access control and permission issues made this impractical. Different team members had different IAM roles and quotas. Eventually, we gave up on the shared bucket approach and ended up using individual buckets per team member, which defeated the purpose of having centralized cloud storage.
+
+(3) Furthermore authentication and setup using API keys and service account credentials took us a long time. We struggled with secret management — storing WANDB_API_KEY and GCP credentials safely across CI/CD, local development, and cloud. We might not still have fully integrated it to the CI in an ideal way.
+
+(4) Getting GPU access we gaev up trying to get our model on the DTU HPC.
 
 ### Question 31
 
