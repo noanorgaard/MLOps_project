@@ -570,7 +570,9 @@ We haven't wired a full external monitoring service yet, but the metrics are ins
 >
 Answer:
 
---- question 27 fill here ---
+We used 323 kr of credits, all of it on Cloud Storage (bucket). The bulk of the spend came from CI runs because our unit tests pulled real data from the bucket via DVC so tests could run directly on the actual dataset. This ensured reproducibility across teammates and CI but increased bucket egress and access during frequent PRs.
+
+Working in the cloud was practical for building and running containers and for storing/serving data from a single place. The main friction was getting everyone authenticated to the same project and handling billing setup, which added some overhead before we could all run workflows consistently.
 
 ### Question 28
 
