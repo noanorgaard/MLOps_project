@@ -122,6 +122,10 @@ will check the repositories and the code to verify your answers.
 > **Enter the group number you signed up on <learn.inside.dtu.dk>**
 >
 Answer:
+
+22
+
+### Question 2
 > **Enter the study number for each member in the group**
 >
 > Example:
