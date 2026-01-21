@@ -7,7 +7,7 @@ like:
 
 Where you instead should add your answers. Any other changes may have unwanted consequences when your report is
 auto-generated at the end of the course. For questions where you are asked to include images, start by adding the image
-to the `figures` subfolder (please only use `.png`, `.jpg` or `.jpeg`) and then add the following code in your answer:
+to the `figures` subfolder (please only use `.png`, `.jpg` or `.jpeg`) and then add the following code in the response:
 
 `![my_image](figures/<image>.<extension>)`
 
@@ -121,20 +121,20 @@ will check the repositories and the code to verify your answers.
 ### Question 1
 > **Enter the group number you signed up on <learn.inside.dtu.dk>**
 >
-> Answer:
+Answer:
 
---- question 1 fill here ---
+22
 
 ### Question 2
 > **Enter the study number for each member in the group**
 >
 > Example:
 >
-> *sXXXXXX, sXXXXXX, sXXXXXX*
+> *sXXXXXX, sXXXXXX, ... *
 >
-> Answer:
+Answer:
 
---- question 2 fill here ---
+s201920, s214458, s221336, s250702 , s194504
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -146,9 +146,9 @@ will check the repositories and the code to verify your answers.
 > *We used the third-party framework ... in our project. We used functionality ... and functionality ... from the*
 > *package to do ... and ... in our project*.
 >
-> Answer:
+Answer:
 
---- question 3 fill here ---
+We didn't end up using any third-party frameworks, apart from `kagglehub`, this was used in `data.py` to automatically download our data rather than manually downloading it, which contributes to reproducibility.
 
 ## Coding environment
 
@@ -166,9 +166,18 @@ will check the repositories and the code to verify your answers.
 > *We used ... for managing our dependencies. The list of dependencies was auto-generated using ... . To get a*
 > *complete copy of our development environment, one would have to run the following commands*
 >
-> Answer:
+Answer:
 
---- question 4 fill here ---
+We used `uv` for managing our dependencies. All dependencies are specified in `pyproject.toml`, separated into main dependencies and optional development dependencies, that is not needed to run the model in production. 
+
+We have generated the `requirements.txt` file was using `uv pip compile pyproject.toml` as this was part of a task in the list. 
+
+To get an exact copy of our environment, a new team member would need to:
+
+1. Install `uv`
+2. Clone the repository
+3. Run `uv sync` to install all dependencies and create a locked virtual environment from our pyproject.toml file while updating `uv.lock`. The lock file guarantees that the same package versions are used everywhere, preventing "works on my machine" issues.
+4. Now just use `uv run <command>` to execute things in the environment.
 
 ### Question 5
 
@@ -182,9 +191,15 @@ will check the repositories and the code to verify your answers.
 > *because we did not use any ... in our project. We have added an ... folder that contains ... for running our*
 > *experiments.*
 >
-> Answer:
+Answer:
 
---- question 5 fill here ---
+From the cookiecutter template we have kept and filled out the core layout: `data/`,`dockerfiles/`, `reports/` `models/`, `notebooks/`, `reports/`, `src/`, `tests/`. 
+
+We are ignoring `data/`,`models/` and `wandb/` to keep large or generated artifacts out of Git. We instead track data/model versions via DVC or W&B instead of source control. The `wandb/` directory contains a folder with reports for each run, and is ignored as the records live in the W&B cloud project.
+
+We removed `notebooks/` directory, as we did not use it and `docs/` for the MkDocs site as we did not implement the extra S10 exercises to our project.
+
+Deviations from the vanilla template: added `configs/` for sweep settings for W&B sweeps.
 
 ### Question 6
 
@@ -197,7 +212,7 @@ will check the repositories and the code to verify your answers.
 > *We used ... for linting and ... for formatting. We also used ... for typing and ... for documentation. These*
 > *concepts are important in larger projects because ... . For example, typing ...*
 >
-> Answer:
+Answer:
 
 We used Ruff for both linting and formatting our code. Ruff is a fast Python linter that enforces PEP8 standards and automatically formats code to maintain consistency. For type checking, we implemented mypy to validate type hints throughout our codebase. Documentation was handled through Google-style docstrings for all functions and classes. These tools are integrated into our CI/CD pipeline through GitHub Actions and pre-commit hooks, ensuring code quality checks run automatically before code is merged.
 
@@ -218,7 +233,7 @@ These concepts are critical in larger projects for several reasons. Code formatt
 > *In total we have implemented X tests. Primarily we are testing ... and ... as these the most critical parts of our*
 > *application but also ... .*
 >
-> Answer:
+Answer:
 
 We implemented 32 tests across multiple test suites. Our unit tests cover data loading and preprocessing functionality (test_data.py), model architecture and forward pass behavior (test_model.py), and API endpoints including root, health, and prediction endpoints (test_api.py). We also have integration tests that verify end-to-end API functionality with a running server, performance tests that measure model inference speed against defined thresholds, and load tests using Locust to validate API performance under concurrent requests. These tests ensure our data pipeline, model, and API work correctly both individually and together.
 
@@ -233,9 +248,9 @@ We implemented 32 tests across multiple test suites. Our unit tests cover data l
 > *The total code coverage of code is X%, which includes all our source code. We are far from 100% coverage of our **
 > *code and even if we were then...*
 >
-> Answer:
+Answer:
 
---- question 8 fill here ---
+Our current test coverage is 23% across the codebase. Major gaps are in API request/response paths, dataset preprocessing branches, drift monitoring code, and training/evaluation scripts, which currently sit at low or 0% coverage. Even with 100% coverage we would not assume the code is bug-free: coverage only shows lines executed, not that outputs or edge cases are correct. If a function or class has 100% test coverage it just means that the edge cases that are handled, have tests. It does not mean that all edge cases are handled. The easiest way to achieve 100% test coverage is to handle any edge cases at all (or not even write any code at all). High-value tests must assert behavior (outputs, error handling, performance thresholds) and include integration paths.
 
 ### Question 9
 
@@ -248,7 +263,7 @@ We implemented 32 tests across multiple test suites. Our unit tests cover data l
 > *We made use of both branches and PRs in our project. In our group, each member had an branch that they worked on in*
 > *addition to the main branch. To merge code we ...*
 >
-> Answer:
+Answer:
 
 Yes, we made extensive use of branches and pull requests in our workflow. Each team member created a new branch when implementing a new feature or fixing a bug. Once coding was complete, the member would pull the latest changes from main and merge them into their branch to ensure compatibility. After pushing their changes, they would create a pull request to merge into main. GitHub Actions automatically ran our test suite on each pull request, and merging was only allowed if all tests passed successfully.
 
@@ -265,7 +280,7 @@ For smaller changes, team members could skip pulling main first and create the p
 > *We did make use of DVC in the following way: ... . In the end it helped us in ... for controlling ... part of our*
 > *pipeline*
 >
-> Answer:
+Answer:
 
 Yes. We used DVC to keep all team members on the exact same dataset. Any data curation steps (e.g., removing bad samples) were versioned so cloud training always pulled the latest validated data. DVC stored large files in remote storage while Git tracked only small metadata, so we could `dvc pull`/`dvc push` without bloating the repo.
 
@@ -284,7 +299,7 @@ In CI and unit tests we ran `dvc pull`, allowing tests to use the real dataset a
 > *and one for running ... . In particular for our ..., we used ... .An example of a triggered workflow can be seen*
 > *here: <weblink>*
 >
-> Answer:
+Answer:
 
 We split CI by job so it is clear and fast, and we run it on every push/PR to main. Linting lives in [./github/workflows/linting.yaml](.github/workflows/linting.yaml): `uv sync` (with cache) installs deps, then ruff lint/format checks and mypy run. Unit tests are in [./github/workflows/unit_tests.yaml](.github/workflows/unit_tests.yaml) with a matrix over Ubuntu/Windows/macOS and Python 3.12/3.13; after GCP auth we `dvc pull` to get the tracked dataset, then run pytest with coverage. Integration tests in [./github/workflows/integration_tests.yaml](.github/workflows/integration_tests.yaml) do the same to exercise the API end-to-end across OS/Python. For staged models we have a repository_dispatch workflow that pulls a W&B artifact and runs performance tests: [stage_model.yaml](https://github.com/noanorgaard/MLOps_project/actions/workflows/stage_model.yaml). An example of a triggered workflow can be seen [here](https://github.com/noanorgaard/MLOps_project/actions/runs/21066112061).
 
@@ -305,9 +320,15 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > Example:
 > *We used a simple argparser, that worked in the following way: Python  my_script.py --lr 1e-3 --batch_size 25*
 >
-> Answer:
+Answer:
 
---- question 12 fill here ---
+We used `invoke` task runner with `uv` to standardize how to run experiments. To run locally: 
+> `uv run invoke train` # runs with defaults (lr=1e-4, batch_size=64, epochs=2)
+
+We use `wandb` as the central hub for hyperparameter management. The `train()` function accepts an optional config dict, which gets passed to `wandb.init()`, and then the hyperparameters are read from `wandb.config`. 
+
+We have also created a `sweep_config.yaml` that defines the sweep space and lets W&B automaticallysample hyperparameter combinations to maximize training accuracy. you can launch a sweep using `wandb sweep configs/sweep_config.yaml`
+
 
 ### Question 13
 
@@ -320,9 +341,19 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *We made use of config files. Whenever an experiment is run the following happens: ... . To reproduce an experiment*
 > *one would have to do ...*
 >
-> Answer:
+Answer:
 
---- question 13 fill here ---
+We secure reproducibility through W&B, Git, DVC, and using `uv.lock`.
+
+Whenever an experiment runs, W&B logs the complete config, metrics, model checkpoints, and system info. DVC ensures the exact dataset version is used. The `uv.lock` file locks all dependencies to specific versions.
+
+To reproduce an experiment you should:
+- Clone the repository
+- `uv sync` to restore the exact Python environment from uv.lock
+- `dvc pull` to get the versioned dataset
+- Run `uv run invoke train` (or `wandb sweep` for a specific sweep run)
+
+W&B automatically captures the config, git commit hash, and all hyperparameters, so revisiting a past run shows exactly what parameters and data were used.
 
 ### Question 14
 
@@ -337,7 +368,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *As seen in the first image when have tracked ... and ... which both inform us about ... in our experiments.*
 > *As seen in the second image we are also tracking ... and ...*
 >
-> Answer:
+Answer:
 
 --- question 14 fill here ---
 
@@ -352,7 +383,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *For our project we developed several images: one for training, inference and deployment. For example to run the*
 > *training docker image: `docker run trainer:latest lr=1e-3 batch_size=64`. Link to docker file: <weblink>*
 >
-> Answer:
+Answer:
 
 --- question 15 fill here ---
 
@@ -367,7 +398,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *Debugging method was dependent on group member. Some just used ... and others used ... . We did a single profiling*
 > *run of our main code at some point that showed ...*
 >
-> Answer:
+Answer:
 
 --- question 16 fill here ---
 
@@ -384,7 +415,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > Example:
 > *We used the following two services: Engine and Bucket. Engine is used for... and Bucket is used for...*
 >
-> Answer:
+Answer:
 
 --- question 17 fill here ---
 
@@ -399,7 +430,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *We used the compute engine to run our ... . We used instances with the following hardware: ... and we started the*
 > *using a custom container: ...*
 >
-> Answer:
+Answer:
 
 --- question 18 fill here ---
 
@@ -408,7 +439,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > **Insert 1-2 images of your GCP bucket, such that we can see what data you have stored in it.**
 > **You can take inspiration from [this figure](figures/bucket.png).**
 >
-> Answer:
+Answer:
 
 ![Buckets overview](figures/Screenshot%202026-01-21%20at%2010.18.47.png)
 
@@ -419,7 +450,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > **Upload 1-2 images of your GCP artifact registry, such that we can see the different docker images that you have**
 > **stored. You can take inspiration from [this figure](figures/registry.png).**
 >
-> Answer:
+Answer:
 
 --- question 20 fill here ---
 
@@ -428,7 +459,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > **Upload 1-2 images of your GCP cloud build history, so we can see the history of the images that have been build in**
 > **your project. You can take inspiration from [this figure](figures/build.png).**
 >
-> Answer:
+Answer:
 
 --- question 21 fill here ---
 
@@ -443,7 +474,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *We managed to train our model in the cloud using the Engine. We did this by ... . The reason we choose the Engine*
 > *was because ...*
 >
-> Answer:
+Answer:
 
 --- question 22 fill here ---
 
@@ -460,9 +491,10 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *We did manage to write an API for our model. We used FastAPI to do this. We did this by ... . We also added ...*
 > *to the API to make it more ...*
 >
-> Answer:
+Answer:
 
---- question 23 fill here ---
+We built a `FastAPI` service in `api.py`. By default it pulls the W&B artifact (using `WANDB_API_KEY`) alias ai_vs_human_model:latest, so it loads whatever run we last aliased as latest. If we set WANDB_SWEEP_ID, the API will instead fetch the best model from that sweep using the configured metric (train/epoch_acc by default). The API auto-selects GPU/MPS/CPU, and creates a `/predict` endpoint for image uploads on a localhost. Incoming images are validated, resized to 224×224, passed through our classifier, and the response returns class (AI or human) plus the confidence.
+The app runs locally with `uv run uvicorn ai_vs_human.api:app --reload` or via the inference Dockerfile in `dockerfiles/api.dockerfile`. For offline use, the service can be pointed to a local artifact directory instead of pulling from W&B.
 
 ### Question 24
 
@@ -476,9 +508,11 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *worked. Afterwards we deployed it in the cloud, using ... . To invoke the service an user would call*
 > *`curl -X POST -F "file=@file.json"<weburl>`*
 >
-> Answer:
+Answer:
 
---- question 24 fill here ---
+We containerized the FastAPI service with api.dockerfile and run it locally via `docker run -p 8000:8000 api:latest` after building. In GCP we used Cloud Build + Artifact Registry to build/push the image, then deployed to Cloud Run with the `WANDB_API_KEY` and artifact parameters as env vars. Invocation: `curl -X POST -F "file=@sample.jpg" https://<cloud-run-url>/predict` returns the class and confidence. For local dev, `uv run uvicorn ai_vs_human.api:app --host 0.0.0.0 --port 8000 --reload` works with a `.env` containing `WANDB_API_KEY`.
+
+#TODO - cloud
 
 ### Question 25
 
@@ -491,9 +525,13 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *For unit testing we used ... and for load testing we used ... . The results of the load testing showed that ...*
 > *before the service crashed.*
 >
-> Answer:
+Answer:
 
---- question 25 fill here ---
+For unit testing we used FastAPI's TestClient with pytest in `test_api.py`. Tests cover the root, health, and prediction endpoints, error handling for edge cases (invalid files, model failures, corrupted images), response validation (status codes, JSON schema, prediction values), and image preprocessing. We used mocked models to test the API logic without requiring a trained model. This returns predictable tensor outputs, allowing us to test the API logic (preprocessing, response formatting, error handling) without loading an actual trained model from W&B, to make our tests faster and independent of external dependencies.
+
+For load testing we used `Locust` (tests/loadtests/locustfile.py) and ran headless via `uv run invoke load_test_locust --host http://localhost:8000 --users 50 --rate 5 --time 2m`, which produced `reports/load_test_report.html`. Under that load the service stayed stable with no errors and p95 latency around 300–400 ms locally.
+
+The app handled the load without crashing, we didn't test higher loads to find the breaking point.
 
 ### Question 26
 
@@ -506,9 +544,14 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *We did not manage to implement monitoring. We would like to have monitoring implemented such that over time we could*
 > *measure ... and ... that would inform us about this ... behaviour of our application.*
 >
-> Answer:
+Answer:
 
---- question 26 fill here ---
+We added `Prometheus` metrics to the API, able to be accessed exposed at a `/metrics` endpoint, tracking request counts, latency, prediction counts, confidence histograms. 
+
+Locally we can scrape this with Prometheus or inspect via `curl`. In production, Cloud Monitoring (managed Prometheus) would scrape the `/metrics` endpoint in Cloud Run to set up alerts on elevated latency/error rates and track drift via confidence distributions. 
+
+We haven't wired a full external monitoring service yet, but the metrics are instrumented and ready for scraping and alerting to catch performance degradation or model drift over time. It would be smart to add Cloud run drift detection and automated alerts to compare current prediction confidence distributions to baselines to catch model degradation early. And get notified when latencu spikes or error rates increase. Without it, we are flying blind and will not know that the API degraded until users report problems.
+
 
 ## Overall discussion of project
 
@@ -525,7 +568,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *Group member 1 used ..., Group member 2 used ..., in total ... credits was spend during development. The service*
 > *costing the most was ... due to ... . Working in the cloud was ...*
 >
-> Answer:
+Answer:
 
 --- question 27 fill here ---
 
@@ -541,7 +584,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 > *We implemented a frontend for our API. We did this because we wanted to show the user ... . The frontend was*
 > *implemented using ...*
 >
-> Answer:
+Answer:
 
 Yes, we implemented energy consumption monitoring using Zeus during model training. Zeus is a framework that tracks GPU energy usage in real-time, providing insights into the environmental and computational cost of training runs. We integrated Zeus into our training pipeline to measure the energy consumed by each training session. This gave us visibility into how much power our experiments used, which is important for understanding the carbon footprint and operational costs of model training, especially when scaling up or running hyperparameter sweeps. By monitoring energy consumption, we could identify more efficient training configurations and make informed decisions about trade-offs between model performance and resource usage.
 
@@ -558,7 +601,7 @@ Yes, we implemented energy consumption monitoring using Zeus during model traini
 > *The starting point of the diagram is our local setup, where we integrated ... and ... and ... into our code.*
 > *Whenever we commit code and push to GitHub, it auto triggers ... and ... . From there the diagram shows ...*
 >
-> Answer:
+Answer:
 
 --- question 29 fill here ---
 
@@ -572,7 +615,7 @@ Yes, we implemented energy consumption monitoring using Zeus during model traini
 > Example:
 > *The biggest challenges in the project was using ... tool to do ... . The reason for this was ...*
 >
-> Answer:
+Answer:
 
 --- question 30 fill here ---
 
@@ -590,6 +633,16 @@ Yes, we implemented energy consumption monitoring using Zeus during model traini
 > *Student sXXXXXX was in charge of training our models in the cloud and deploying them afterwards.*
 > *All members contributed to code by...*
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
-> Answer:
+Answer:
 
---- question 31 fill here ---
+Student s201920 was in charge of developing of setting up the initial cookie cutter project and setting up and configuring the API and configuring the connection to wandb.
+Student s214458, 
+Student s221336, 
+Student s250702, 
+Student s194504, was in charge of training our models in the cloud and deploying them afterwards. 
+
+All members contributed to code by sharing the same Git.
+
+We have used ChatGPT to help debug our code and set up docker files. Additionally, we used GitHub Copilot to help write some of our code and ask about "how to Git", and we have set up an `AGENT.md` file to streamline our prompt answers.
+
+
