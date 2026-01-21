@@ -20,8 +20,16 @@ from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse, Response
 from PIL import Image
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
+import json
+import datetime
+from fastapi import BackgroundTasks
+from google.cloud import storage
 
 from ai_vs_human.model import get_model
+from ai_vs_human.data_drif import extract_features
+
+GCS_BUCKET_NAME = "ai-vs-human-monitoring"  # "mlops-project-22-monitoring" #os.getenv("GCS_BUCKET_NAME", "")
+GCS_PREFIX = "prediction"
 
 # Load environment variables from .env file
 load_dotenv()
@@ -136,6 +144,18 @@ def _download_best_sweep_artifact(
     artifact_dir = artifact.download()
     logger.info("Downloaded artifact %s to %s", artifact.name, artifact_dir)
     return Path(artifact_dir)
+
+
+def save_to_gcs(data: dict) -> None:
+    if not GCS_BUCKET_NAME:
+        return
+
+    client = storage.Client()
+    bucket = client.bucket(GCS_BUCKET_NAME)
+
+    ts = datetime.datetime.now(tz=datetime.UTC).strftime("%Y%m%d_%H%M%S_%f")
+    blob = bucket.blob(f"{GCS_PREFIX}/pred_{ts}.json")
+    blob.upload_from_string(json.dumps(data), content_type="application/json")
 
 
 # Middleware to track all requests
@@ -273,7 +293,10 @@ async def load_model_from_wandb() -> None:
 
 
 @app.post("/predict")
-async def predict(file: Annotated[UploadFile, File()]) -> JSONResponse:
+async def predict(
+    file: Annotated[UploadFile, File()],
+    background_tasks: BackgroundTasks,
+) -> JSONResponse:
     """
     Classify an image as AI-generated or human-made.
 
@@ -306,6 +329,8 @@ async def predict(file: Annotated[UploadFile, File()]) -> JSONResponse:
         arr = np.clip(arr, 0.0, 1.0)
         arr = np.transpose(arr, (2, 0, 1))  # HWC -> CHW
 
+        features = extract_features(arr)
+
         # Convert to tensor and add batch dimension
         image_tensor = torch.from_numpy(arr).float().unsqueeze(0).to(device)
 
@@ -314,6 +339,16 @@ async def predict(file: Annotated[UploadFile, File()]) -> JSONResponse:
             logit = model(image_tensor).squeeze()
             confidence = torch.sigmoid(logit).item()
             prediction = "AI-generated" if confidence > 0.5 else "Human-made"
+
+        background_tasks.add_task(
+            save_to_gcs,
+            {
+                "timestamp": datetime.datetime.now(tz=datetime.UTC).isoformat(),
+                "prediction": prediction,
+                "confidence": float(confidence),
+                "features": features,
+            },
+        )
 
         # Record prediction metrics
         PREDICTION_COUNT.labels(prediction_class=prediction).inc()
