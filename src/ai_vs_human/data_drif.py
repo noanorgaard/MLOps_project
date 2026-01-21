@@ -10,6 +10,9 @@ from evidently.legacy.report import Report
 from google.cloud import storage
 from ai_vs_human.data import MyDataset
 
+GCS_BUCKET_NAME = "mlops-project-22-monitoring"
+GCS_OBJECT_NAME = "reference/features.csv"
+
 
 def extract_features(img_chw: np.ndarray) -> dict:
     gray = img_chw.mean(axis=0)
@@ -51,9 +54,6 @@ def extract_clip_features(images: torch.Tensor, model, processor, batch_size: in
 
 
 def upload_training_features() -> None:
-    GCS_BUCKET_NAME = "ai-vs-human-monitoring"
-    GCS_OBJECT_NAME = "reference/features.csv"
-
     train_ds = MyDataset(train=True)
 
     rows = []
