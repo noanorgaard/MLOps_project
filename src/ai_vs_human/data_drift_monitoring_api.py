@@ -1,13 +1,13 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import anyio
 import pandas as pd
 from evidently.legacy.metrics import DataDriftTable
 from evidently.legacy.report import Report
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from google.cloud import storage
 
