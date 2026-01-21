@@ -84,7 +84,7 @@ def _is_image_file(p: Path) -> bool:
 
 def _load_and_process_image(path: Path, size: int) -> torch.Tensor:
     img = Image.open(path).convert("RGB")
-    img = img.resize((size, size), Image.LANCZOS)
+    img = img.resize((size, size), Image.LANCZOS)  # type: ignore[attr-defined]
     arr = np.asarray(img, dtype=np.float32) / 255.0
     arr = np.clip(arr, 0.0, 1.0)
     arr = np.transpose(arr, (2, 0, 1))
@@ -267,12 +267,23 @@ def download_data(raw_dir: Path) -> Path:
     return dataset_path
 
 
+"""
 def prepare_data(
     raw_dir: Path = typer.Option(Path("data/raw"), help="Raw data directory containing 'ai' and 'human' subfolders"),
     processed_dir: Path = typer.Option(Path("data/processed"), help="Where to write processed tensors"),
     image_size: int = typer.Option(224, help="Size (H and W) to resize images to"),
     train_split: float = typer.Option(0.8, help="Fraction of data to use for training"),
     seed: int = typer.Option(42, help="Shuffle seed"),
+) -> None:
+"""
+
+
+def prepare_data(
+    raw_dir: Path = Path("data/raw"),
+    processed_dir: Path = Path("data/processed"),
+    image_size: int = 224,
+    train_split: float = 0.8,
+    seed: int = 42,
 ) -> None:
     """Preprocess raw image dataset into torch tensors."""
 
@@ -300,6 +311,7 @@ def prepare_data(
         train_split=train_split,
         seed=seed,
     )
+
 
 if __name__ == "__main__":
     typer.run(prepare_data)

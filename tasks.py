@@ -6,36 +6,51 @@ WINDOWS = os.name == "nt"
 PROJECT_NAME = "ai_vs_human"
 PYTHON_VERSION = "3.12"
 
+
 # Project commands
 @task
 def preprocess_data(ctx: Context) -> None:
     """Preprocess data."""
     ctx.run(f"uv run src/{PROJECT_NAME}/data.py data/raw data/processed", echo=True, pty=not WINDOWS)
 
+
 @task
 def train(ctx: Context) -> None:
     """Train model."""
     ctx.run(f"uv run src/{PROJECT_NAME}/train.py", echo=True, pty=not WINDOWS)
+
 
 @task
 def test(ctx: Context) -> None:
     """Run tests."""
     ctx.run("uv run coverage run -m pytest tests/", echo=True, pty=not WINDOWS)
     ctx.run("uv run coverage report -m -i", echo=True, pty=not WINDOWS)
-    
+
+
+@task
+def api(ctx: Context, port: int = 8000) -> None:
+    """Run the API locally (requires .env file with WANDB_API_KEY)."""
+    ctx.run(f"uv run uvicorn {PROJECT_NAME}.api:app --host 0.0.0.0 --port {port} --reload", echo=True, pty=not WINDOWS)
+
+
 @task
 def docker_build(ctx: Context, progress: str = "plain") -> None:
-    """Build docker images."""
+    """Build docker images (API image requires .env file)."""
     ctx.run(
         f"docker build -t train:latest . -f dockerfiles/train.dockerfile --progress={progress}",
         echo=True,
-        pty=not WINDOWS
+        pty=not WINDOWS,
     )
     ctx.run(
-        f"docker build -t api:latest . -f dockerfiles/api.dockerfile --progress={progress}",
-        echo=True,
-        pty=not WINDOWS
+        f"docker build -t api:latest . -f dockerfiles/api.dockerfile --progress={progress}", echo=True, pty=not WINDOWS
     )
+
+
+@task
+def docker_run_api(ctx: Context, port: int = 8000) -> None:
+    """Run the API docker container."""
+    ctx.run(f"docker run -p {port}:8000 api:latest", echo=True, pty=not WINDOWS)
+
 
 # Documentation commands
 @task
@@ -43,7 +58,36 @@ def build_docs(ctx: Context) -> None:
     """Build documentation."""
     ctx.run("uv run mkdocs build --config-file docs/mkdocs.yaml --site-dir build", echo=True, pty=not WINDOWS)
 
+
 @task
 def serve_docs(ctx: Context) -> None:
     """Serve documentation."""
     ctx.run("uv run mkdocs serve --config-file docs/mkdocs.yaml", echo=True, pty=not WINDOWS)
+
+
+# Load testing commands
+@task
+def load_test_locust(
+    ctx: Context, host: str = "http://localhost:8000", users: int = 50, rate: int = 5, time: str = "2m"
+) -> None:
+    """Run Locust load test in headless mode.
+
+    Args:
+        host: API host URL
+        users: Number of concurrent users to simulate
+        rate: User spawn rate per second
+        time: Test duration (e.g., '2m', '30s', '1h')
+    """
+    ctx.run(
+        f"uv run locust -f tests/loadtests/locustfile.py --host={host} "
+        f"--users {users} --spawn-rate {rate} --run-time {time} "
+        f"--headless --html reports/load_test_report.html",
+        echo=True,
+        pty=not WINDOWS,
+    )
+
+
+@task
+def load_test_locust_web(ctx: Context, host: str = "http://localhost:8000") -> None:
+    """Start Locust web interface for interactive load testing."""
+    ctx.run(f"uv run locust -f tests/loadtests/locustfile.py --host={host}", echo=True, pty=not WINDOWS)
