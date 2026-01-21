@@ -7,9 +7,10 @@ import anyio
 import pandas as pd
 from evidently.legacy.metrics import DataDriftTable
 from evidently.legacy.report import Report
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from google.cloud import storage
+from typing import Optional
 
 
 GCS_BUCKET_NAME = "mlops-project-22-monitoring"
@@ -97,6 +98,11 @@ def run_drift_report(reference: pd.DataFrame, current: pd.DataFrame, out_path: s
     report.save_html(out_path)
 
 
+# Keeps mypy happy about global scope variables
+training_reference: Optional[pd.DataFrame] = None
+feature_columns: Optional[List[str]] = None
+
+
 async def lifespan(app: FastAPI):
     """Load reference data once at startup."""
     global training_reference, feature_columns
@@ -111,7 +117,8 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    del training_reference, feature_columns
+    training_reference = None
+    feature_columns = None
 
 
 app = FastAPI(lifespan=lifespan)
@@ -120,6 +127,10 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/report", response_class=HTMLResponse)
 async def get_report(n: int = 50):
     """Generate and return the report."""
+    if training_reference is None or feature_columns is None:
+        # Pick your preferred behavior:
+        raise HTTPException(status_code=503, detail="Reference data not loaded yet")
+
     download_latest_predictions_to_dir(
         bucket_name=GCS_BUCKET_NAME,
         prefix=PREDICTION_PREFIX,
