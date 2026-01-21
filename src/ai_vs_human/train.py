@@ -1,5 +1,5 @@
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 from ai_vs_human.model import get_model
 from ai_vs_human.data import MyDataset
 from zeus.monitor import ZeusMonitor
@@ -65,7 +65,6 @@ def train(config: dict | None = None):
     _wandb_setup()
 
     from ai_vs_human.data import prepare_data
-
     from pathlib import Path
 
     prepare_data(raw_dir=Path("data/raw"), processed_dir=Path("data/processed"))
@@ -83,11 +82,23 @@ def train(config: dict | None = None):
     batch_size = cfg.batch_size
     epochs = cfg.epochs
 
-    dataset = MyDataset(raw_dir="data/raw", processed_dir="data/processed", train=True)
+    # ---- Train/Val split (added) ----
+    full_train = MyDataset(raw_dir="data/raw", processed_dir="data/processed", train=True)
 
-    print(f"dataset found at {dataset.processed_dir}")
+    val_fraction = 0.1
+    val_size = int(len(full_train) * val_fraction)
+    train_size = len(full_train) - val_size
+
+    train_ds, val_ds = random_split(
+        full_train,
+        [train_size, val_size],
+        generator=torch.Generator().manual_seed(42),
+    )
+
+    print(f"dataset found at {full_train.processed_dir}")
     print(f"Training with lr={lr}, batch_size={batch_size}, epochs={epochs}")
-    trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    trainloader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+    valloader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
 
     model = get_model()
     device = torch.device(
@@ -175,16 +186,40 @@ def train(config: dict | None = None):
             avg_energy = sum(map(lambda m: m.total_energy, steps)) / len(steps)
             print(f"One step took {avg_time} s and {avg_energy} J on average.")
 
-            # Epoch metrics
+            # Epoch metrics (train)
             epoch_loss = running_loss / max(n_batches, 1)
             epoch_acc = running_acc / max(n_batches, 1)
             print(f"Epoch {epoch+1}/{epochs}, Loss: {epoch_loss:.4f}, Acc: {epoch_acc:.4f}")
+
+            # ---- Validation (added) ----
+            model.eval()
+            val_loss_sum = 0.0
+            val_acc_sum = 0.0
+            val_batches = 0
+
+            with torch.no_grad():
+                for images, labels in valloader:
+                    images, labels = images.to(device), labels.to(device)
+                    outputs = model(images)
+                    vloss = criterion(outputs.squeeze(), labels.float())
+                    vacc = _binary_accuracy_from_logits(outputs, labels)
+
+                    val_loss_sum += vloss.item()
+                    val_acc_sum += vacc
+                    val_batches += 1
+
+            val_epoch_loss = val_loss_sum / max(val_batches, 1)
+            val_epoch_acc = val_acc_sum / max(val_batches, 1)
+            print(f"Val   {epoch+1}/{epochs}, Loss: {val_epoch_loss:.4f}, Acc: {val_epoch_acc:.4f}")
+
             wandb.log(
                 {
                     "train/epoch_loss": epoch_loss,
                     "train/epoch_acc": epoch_acc,
                     "train/epoch_time": mes.time,
                     "train/epoch_energy": mes.total_energy,
+                    "val/loss": val_epoch_loss,
+                    "val/acc": val_epoch_acc,
                 },
                 step=global_step,
             )
@@ -210,7 +245,7 @@ def train(config: dict | None = None):
             f"wandb-registry-{ENTITY}/{COLLECTION_NAME}",
             aliases=["latest"],
         )
-
+        
     finally:
         wandb.finish()
 
