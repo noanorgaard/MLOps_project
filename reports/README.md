@@ -246,7 +246,7 @@ We implemented 32 tests across multiple test suites. Our unit tests cover data l
 >
 Answer:
 
-Our current test coverage is 23% across the codebase. Major gaps are in API request/response paths, dataset preprocessing branches, drift monitoring code, and training/evaluation scripts, which currently sit at low or 0% coverage. Even with 100% coverage we would not assume the code is bug-free: coverage only shows lines executed, not that outputs or edge cases are correct. If a function or class has 100% test coverage it just means that the edge cases that are handled, have tests. It does not mean that all edge cases are handled. The easiest way to achieve 100% test coverage is to handle any edge cases at all (or not even write any code at all). High-value tests must assert behavior (outputs, error handling, performance thresholds) and include integration paths.
+--- question 8 fill here ---
 
 ### Question 9
 
@@ -318,13 +318,7 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 >
 Answer:
 
-We used `invoke` task runner with `uv` to standardize how to run experiments. To run locally: 
-> `uv run invoke train` # runs with defaults (lr=1e-4, batch_size=64, epochs=2)
-
-We use `wandb` as the central hub for hyperparameter management. The `train()` function accepts an optional config dict, which gets passed to `wandb.init()`, and then the hyperparameters are read from `wandb.config`. 
-
-We have also created a `sweep_config.yaml` that defines the sweep space and lets W&B automaticallysample hyperparameter combinations to maximize training accuracy. you can launch a sweep using `wandb sweep configs/sweep_config.yaml`
-
+--- question 12 fill here ---
 
 ### Question 13
 
@@ -339,17 +333,7 @@ We have also created a `sweep_config.yaml` that defines the sweep space and lets
 >
 Answer:
 
-We secure reproducibility through W&B, Git, DVC, and using `uv.lock`.
-
-Whenever an experiment runs, W&B logs the complete config, metrics, model checkpoints, and system info. DVC ensures the exact dataset version is used. The `uv.lock` file locks all dependencies to specific versions.
-
-To reproduce an experiment you should:
-- Clone the repository
-- `uv sync` to restore the exact Python environment from uv.lock
-- `dvc pull` to get the versioned dataset
-- Run `uv run invoke train` (or `wandb sweep` for a specific sweep run)
-
-W&B automatically captures the config, git commit hash, and all hyperparameters, so revisiting a past run shows exactly what parameters and data were used.
+--- question 13 fill here ---
 
 ### Question 14
 
@@ -521,18 +505,9 @@ The app runs locally with `uv run uvicorn ai_vs_human.api:app --reload` or via t
 >
 Answer:
 
-Yes. Locally we ran the API either directly with Uvicorn (`uv run uvicorn ai_vs_human.api:app --host 0.0.0.0 --port 8000 --reload`) or
-as a container built from `dockerfiles/api.dockerfile` (build + run with `docker build -f dockerfiles/api.dockerfile -t ai-vs-human-api .`
-and `docker run -p 8000:8000 ai-vs-human-api`).
+We containerized the FastAPI service with api.dockerfile and run it locally via `docker run -p 8000:8000 api:latest` after building. In GCP we used Cloud Build + Artifact Registry to build/push the image, then deployed to Cloud Run with the `WANDB_API_KEY` and artifact parameters as env vars. Invocation: `curl -X POST -F "file=@sample.jpg" https://ai-vs-human-api-onyhgpfxqq-ew.a.run.app/predict` returns the class and confidence. For local dev, `uv run uvicorn ai_vs_human.api:app --host 0.0.0.0 --port 8000 --reload` works with a `.env` containing `WANDB_API_KEY`.
 
-In the cloud, we used Cloud Build to build/push the container image to Artifact Registry and then deployed it to Cloud Run as the service
-`ai-vs-human-api` in region `europe-west1` (project `dtumlops-484111`). Runtime configuration was provided through environment variables,
-most importantly `WANDB_API_KEY` (so the service can pull the latest model from W&B), plus `GCS_BUCKET_NAME` and `PREDICTION_PREFIX` so
-predictions are logged to GCS for drift monitoring.
 
-To invoke the deployed service we used:
-`curl -X POST -F "file=@sample.jpg" https://<cloud-run-url>/predict`.
-We also used `curl https://<cloud-run-url>/health` as a lightweight health check.
 
 ### Question 25
 
@@ -655,14 +630,4 @@ Answer:
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 Answer:
 
-Student s201920 was in charge of developing of setting up the initial cookie cutter project and setting up and configuring the API and configuring the connection to wandb.
-Student s214458, 
-Student s221336, 
-Student s250702, 
-Student s194504, was in charge of training our models in the cloud and deploying them afterwards. 
-
-All members contributed to code by sharing the same Git.
-
-We have used ChatGPT to help debug our code and set up docker files. Additionally, we used GitHub Copilot to help write some of our code and ask about "how to Git", and we have set up an `AGENT.md` file to streamline our prompt answers.
-
-
+--- question 31 fill here ---
