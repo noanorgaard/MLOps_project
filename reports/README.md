@@ -643,6 +643,6 @@ Student s194504, was in charge of training our models in the cloud and deploying
 
 All members contributed to code by sharing the same Git.
 
-We have used ChatGPT to help debug our code and set up docker files. Additionally, we used GitHub Copilot to help write some of our code and ask about "how to Git".
+We have used ChatGPT to help debug our code and set up docker files. Additionally, we used GitHub Copilot to help write some of our code and ask about "how to Git", and we have set up an `AGENT.md` file to streamline our prompt answers.
 
 
