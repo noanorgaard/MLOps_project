@@ -339,7 +339,17 @@ We have also created a `sweep_config.yaml` that defines the sweep space and lets
 >
 Answer:
 
---- question 13 fill here ---
+We secure reproducibility through W&B, Git, DVC, and using `uv.lock`.
+
+Whenever an experiment runs, W&B logs the complete config, metrics, model checkpoints, and system info. DVC ensures the exact dataset version is used. The `uv.lock` file locks all dependencies to specific versions.
+
+To reproduce an experiment you should:
+- Clone the repository
+- `uv sync` to restore the exact Python environment from uv.lock
+- `dvc pull` to get the versioned dataset
+- Run `uv run invoke train` (or `wandb sweep` for a specific sweep run)
+
+W&B automatically captures the config, git commit hash, and all hyperparameters, so revisiting a past run shows exactly what parameters and data were used.
 
 ### Question 14
 
@@ -355,6 +365,10 @@ Answer:
 > *As seen in the second image we are also tracking ... and ...*
 >
 Answer:
+
+![alt text](figures/wandb_parameters.png)
+![alt text](figures/wandb_images.png)
+
 We use Weights & Biases (W&B) to keep track of our experiments and compare different training runs within the same project. As shown in the first screenshot, we log the training loss over steps and epochs for multiple runs, including hyperparameter sweeps. Loss is an important metric because it shows how well the model is learning and how quickly it converges for different configurations.
 
 Besides loss, we also track the number of epochs and training steps for each run. This makes it easier to compare experiments fairly, especially in sweeps where some runs may train longer than others. Looking at loss together with epochs helps us understand whether better results come from better learning or simply from longer training, and it can also hint at overfitting.
@@ -612,6 +626,8 @@ Yes, we implemented energy consumption monitoring using Zeus during model traini
 > *Whenever we commit code and push to GitHub, it auto triggers ... and ... . From there the diagram shows ...*
 >
 Answer:
+
+![alt text](figures/project_architecture.jpg)
 
 The figure shows the overall architecture of our system and how the different tools are connected.
 
