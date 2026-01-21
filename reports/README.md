@@ -164,9 +164,9 @@ We didn't end up using any third-party frameworks, apart from `kagglehub`, this 
 >
 Answer:
 
-We used `uv` for managing our dependencies. All dependencies are specified in `pyproject.toml`, separated into main dependencies and optional development dependencies, that is not needed to run the model in production. 
+We used `uv` for managing our dependencies. All dependencies are specified in `pyproject.toml`, separated into main dependencies and optional development dependencies, that is not needed to run the model in production.
 
-We have generated the `requirements.txt` file was using `uv pip compile pyproject.toml` as this was part of a task in the list. 
+We have generated the `requirements.txt` file was using `uv pip compile pyproject.toml` as this was part of a task in the list.
 
 To get an exact copy of our environment, a new team member would need to:
 
@@ -189,7 +189,7 @@ To get an exact copy of our environment, a new team member would need to:
 >
 Answer:
 
-From the cookiecutter template we have kept and filled out the core layout: `data/`,`dockerfiles/`, `reports/` `models/`, `notebooks/`, `reports/`, `src/`, `tests/`. 
+From the cookiecutter template we have kept and filled out the core layout: `data/`,`dockerfiles/`, `reports/` `models/`, `notebooks/`, `reports/`, `src/`, `tests/`.
 
 We are ignoring `data/`,`models/` and `wandb/` to keep large or generated artifacts out of Git. We instead track data/model versions via DVC or W&B instead of source control. The `wandb/` directory contains a folder with reports for each run, and is ignored as the records live in the W&B cloud project.
 
@@ -318,7 +318,13 @@ We cache installs via setup-uv to keep runs quick. The OS/Python matrix finds pl
 >
 Answer:
 
---- question 12 fill here ---
+We used `invoke` task runner with `uv` to standardize how to run experiments. To run locally:
+> `uv run invoke train` # runs with defaults (lr=1e-4, batch_size=64, epochs=2)
+
+We use `wandb` as the central hub for hyperparameter management. The `train()` function accepts an optional config dict, which gets passed to `wandb.init()`, and then the hyperparameters are read from `wandb.config`.
+
+We have also created a `sweep_config.yaml` that defines the sweep space and lets W&B automaticallysample hyperparameter combinations to maximize training accuracy. you can launch a sweep using `wandb sweep configs/sweep_config.yaml`
+
 
 ### Question 13
 
@@ -541,9 +547,9 @@ The app handled the load without crashing, we didn't test higher loads to find t
 >
 Answer:
 
-We added `Prometheus` metrics to the API, able to be accessed exposed at a `/metrics` endpoint, tracking request counts, latency, prediction counts, confidence histograms. 
+We added `Prometheus` metrics to the API, able to be accessed exposed at a `/metrics` endpoint, tracking request counts, latency, prediction counts, confidence histograms.
 
-Locally we can scrape this with Prometheus or inspect via `curl`. In production, Cloud Monitoring (managed Prometheus) would scrape the `/metrics` endpoint in Cloud Run to set up alerts on elevated latency/error rates and track drift via confidence distributions. 
+Locally we can scrape this with Prometheus or inspect via `curl`. In production, Cloud Monitoring (managed Prometheus) would scrape the `/metrics` endpoint in Cloud Run to set up alerts on elevated latency/error rates and track drift via confidence distributions.
 
 We haven't wired a full external monitoring service yet, but the metrics are instrumented and ready for scraping and alerting to catch performance degradation or model drift over time. It would be smart to add Cloud run drift detection and automated alerts to compare current prediction confidence distributions to baselines to catch model degradation early. And get notified when latencu spikes or error rates increase. Without it, we are flying blind and will not know that the API degraded until users report problems.
 
@@ -630,4 +636,12 @@ Answer:
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 Answer:
 
---- question 31 fill here ---
+Student s201920 was in charge of developing of setting up the initial cookie cutter project and setting up and configuring the API and configuring the connection to wandb.
+Student s214458,
+Student s221336 was in charge of setting up DVC with GCP for the project. They was also responsible for configuring the contionous integration setup to run tests on pull requests and pushes to main. Finally they implemented the tests on staged models workflow and integrated the Zeus framework for monitoring energy consumption during training.
+Student s250702,
+Student s194504, was in charge of training our models in the cloud and deploying them afterwards.
+
+All members contributed to code by sharing the same Git.
+
+We have used ChatGPT to help debug our code and set up docker files. Additionally, we used GitHub Copilot to help write some of our code and ask about "how to Git", and we have set up an `AGENT.md` file to streamline our prompt answers.
