@@ -1,4 +1,4 @@
-site_name: delete
+site_name: AI vs Human (MLOps)
 site_author: dtu
 docs_dir: source
 
@@ -21,3 +21,4 @@ plugins:
 
 nav:
   - Home: index.md
+  - Drift Detection: drift.md

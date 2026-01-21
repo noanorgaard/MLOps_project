@@ -1,0 +1,5 @@
+# Minimal drift build context should already be small, but keep caches out.
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/

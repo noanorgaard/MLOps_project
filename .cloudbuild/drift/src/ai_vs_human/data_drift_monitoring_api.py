@@ -8,7 +8,6 @@ import pandas as pd
 from evidently.legacy.metrics import DataDriftTable
 from evidently.legacy.report import Report
 from fastapi import FastAPI
-from fastapi import HTTPException
 from fastapi.responses import HTMLResponse
 from google.cloud import storage
 
@@ -19,11 +18,6 @@ PREDICTION_PREFIX = os.getenv("PREDICTION_PREFIX", "prediction/")
 
 REPORT_PATH = "data_drift_report.html"
 PRED_CACHE_DIR = Path("./pred_cache")
-
-
-training_reference: pd.DataFrame | None = None
-feature_columns: List[str] = []
-reference_load_error: str | None = None
 
 
 def download_reference_csv(bucket_name: str, blob_name: str) -> pd.DataFrame:
@@ -105,30 +99,19 @@ def run_drift_report(reference: pd.DataFrame, current: pd.DataFrame, out_path: s
 
 async def lifespan(app: FastAPI):
     """Load reference data once at startup."""
-    global training_reference, feature_columns, reference_load_error
+    global training_reference, feature_columns
 
-    try:
-        df = download_reference_csv(GCS_BUCKET_NAME, REFERENCE_BLOB)
+    df = download_reference_csv(GCS_BUCKET_NAME, REFERENCE_BLOB)
 
-        non_feature_cols = {"index", "timestamp"}
-        cols = [c for c in df.columns if c not in non_feature_cols]
+    non_feature_cols = {"index", "timestamp"}
+    cols = [c for c in df.columns if c not in non_feature_cols]
 
-        training_reference = df[cols].copy()
-        feature_columns = cols
-        reference_load_error = None
-    except Exception as exc:
-        # Cloud Run needs the process to start and listen on $PORT.
-        # If the bucket/object/IAM is misconfigured, we keep the service up
-        # and surface the error on /health and /report.
-        training_reference = None
-        feature_columns = []
-        reference_load_error = f"{type(exc).__name__}: {exc}"
+    training_reference = df[cols].copy()
+    feature_columns = cols
 
     yield
 
-    training_reference = None
-    feature_columns = []
-    reference_load_error = None
+    del training_reference, feature_columns
 
 
 app = FastAPI(lifespan=lifespan)
@@ -137,30 +120,17 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/health")
 async def health() -> Dict[str, Any]:
     """Health endpoint for Cloud Run."""
-    ok = training_reference is not None and not reference_load_error
     return {
-        "status": "ok" if ok else "degraded",
+        "status": "ok",
         "gcs_bucket": GCS_BUCKET_NAME,
         "reference_blob": REFERENCE_BLOB,
         "prediction_prefix": PREDICTION_PREFIX,
-        "reference_loaded": training_reference is not None,
-        "reference_error": reference_load_error,
     }
 
 
 @app.get("/report", response_class=HTMLResponse)
 async def get_report(n: int = 50):
     """Generate and return the report."""
-    if training_reference is None or reference_load_error:
-        raise HTTPException(
-            status_code=503,
-            detail=(
-                "Reference data not available. "
-                "Check that the GCS object exists and that the Cloud Run service account has roles/storage.objectViewer. "
-                f"Current error: {reference_load_error}"
-            ),
-        )
-
     download_latest_predictions_to_dir(
         bucket_name=GCS_BUCKET_NAME,
         prefix=PREDICTION_PREFIX,

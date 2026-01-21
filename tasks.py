@@ -34,6 +34,22 @@ def api(ctx: Context, port: int = 8000) -> None:
 
 
 @task
+def drift_api(ctx: Context, port: int = 8001) -> None:
+    """Run the drift detection API locally."""
+    ctx.run(
+        f"uv run uvicorn {PROJECT_NAME}.data_drift_monitoring_api:app --host 0.0.0.0 --port {port} --reload",
+        echo=True,
+        pty=not WINDOWS,
+    )
+
+
+@task
+def upload_reference_features(ctx: Context) -> None:
+    """Upload reference feature CSV to GCS for drift detection."""
+    ctx.run(f"uv run python -m {PROJECT_NAME}.upload_reference_features", echo=True, pty=not WINDOWS)
+
+
+@task
 def docker_build(ctx: Context, progress: str = "plain") -> None:
     """Build docker images (API image requires .env file)."""
     ctx.run(
@@ -43,6 +59,38 @@ def docker_build(ctx: Context, progress: str = "plain") -> None:
     )
     ctx.run(
         f"docker build -t api:latest . -f dockerfiles/api.dockerfile --progress={progress}", echo=True, pty=not WINDOWS
+    )
+
+
+@task
+def docker_build_drift(ctx: Context, progress: str = "plain") -> None:
+    """Build the drift API docker image."""
+    ctx.run(
+        f"docker build -t drift:latest . -f dockerfiles/drift.dockerfile --progress={progress}",
+        echo=True,
+        pty=not WINDOWS,
+    )
+
+
+@task
+def cloudbuild_drift(ctx: Context) -> None:
+    """Build + push drift API image using a minimal Cloud Build context."""
+    ctx.run("uv run python scripts/prepare_cloudbuild_context.py drift", echo=True, pty=not WINDOWS)
+    ctx.run(
+        "gcloud builds submit .cloudbuild/drift --config .cloudbuild/drift/cloudbuild.yaml",
+        echo=True,
+        pty=not WINDOWS,
+    )
+
+
+@task
+def cloudbuild_api(ctx: Context) -> None:
+    """Build + push inference API image using a minimal Cloud Build context."""
+    ctx.run("uv run python scripts/prepare_cloudbuild_context.py api", echo=True, pty=not WINDOWS)
+    ctx.run(
+        "gcloud builds submit .cloudbuild/api --config .cloudbuild/api/cloudbuild.yaml",
+        echo=True,
+        pty=not WINDOWS,
     )
 
 

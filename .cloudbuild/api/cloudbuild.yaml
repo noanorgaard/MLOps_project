@@ -1,0 +1,18 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Build inference API image'
+  env:
+    - 'DOCKER_BUILDKIT=1'
+  args: [
+    'build',
+    '.',
+    '-t',
+    'europe-west1-docker.pkg.dev/dtumlops-484111/container-registry/ai-vs-human-api:latest'
+  ]
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Push inference API image'
+  args: [
+    'push',
+    'europe-west1-docker.pkg.dev/dtumlops-484111/container-registry/ai-vs-human-api:latest'
+  ]

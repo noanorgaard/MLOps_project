@@ -1,0 +1,20 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Build drift API image'
+  env:
+    - 'DOCKER_BUILDKIT=1'
+  args: [
+    'build',
+    '.',
+    '-t',
+    'europe-west1-docker.pkg.dev/dtumlops-484111/container-registry/drift-api:latest',
+    '-f',
+    'dockerfiles/drift.dockerfile'
+  ]
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Push drift API image'
+  args: [
+    'push',
+    'europe-west1-docker.pkg.dev/dtumlops-484111/container-registry/drift-api:latest'
+  ]

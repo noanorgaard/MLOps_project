@@ -7,7 +7,6 @@ import io
 import logging
 import os
 import time
-import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
@@ -42,12 +41,8 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """FastAPI lifespan handler.
-
-    Cloud Run requires the container to start listening quickly on $PORT.
-    Model download/loading can be slow and memory heavy, so we load the model lazily
-    on the first `/predict` call instead of during startup.
-    """
+    """FastAPI lifespan handler to load model on startup."""
+    await load_model_from_wandb()
     yield
 
 
@@ -61,7 +56,6 @@ app = FastAPI(
 # Global model state
 model: nn.Module | None = None
 device: torch.device | None = None
-model_load_lock = asyncio.Lock()
 
 # ==================== Prometheus Metrics ====================
 # Request metrics
@@ -316,18 +310,11 @@ async def predict(
     Raises:
         HTTPException: If model not loaded or file processing fails
     """
-    global model, device
     if model is None or device is None:
-        async with model_load_lock:
-            if model is None or device is None:
-                try:
-                    await load_model_from_wandb()
-                except Exception as exc:
-                    logger.error("Model load failed: %s", exc)
-                    raise HTTPException(
-                        status_code=503,
-                        detail="Model not loaded. Check server logs for W&B artifact loading errors.",
-                    )
+        logger.error("Model not loaded - cannot make predictions")
+        raise HTTPException(
+            status_code=503, detail="Model not loaded. Check server logs for W&B artifact loading errors."
+        )
 
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail=f"Invalid file type: {file.content_type}. Must be an image.")

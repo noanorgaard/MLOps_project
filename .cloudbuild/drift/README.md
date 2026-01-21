@@ -136,7 +136,7 @@ and generates an Evidently HTML drift report.
 
 - Drift API code: `src/ai_vs_human/data_drift_monitoring_api.py`
 - Drift container: `dockerfiles/drift.dockerfile`
-- Cloud Build (minimal context): `.cloudbuild/drift/cloudbuild.yaml`
+- Cloud Build config: `cloudbuild.drift.yaml`
 
 Docs: see `docs/source/drift.md`.
 

@@ -1,0 +1,43 @@
+# Keep Cloud Build context small (avoids uploading datasets/models).
+# gcloud will also consider .gitignore, but we make it explicit here.
+
+# Data & artifacts
+data/
+data/**
+models/
+models/**
+wandb/
+wandb/**
+artifacts/
+artifacts/**
+reports/
+reports/**
+notebooks/
+notebooks/**
+
+# Local envs/cache
+.venv/
+.venv/**
+__pycache__/
+**/__pycache__/
+.pytest_cache/
+.pytest_cache/**
+.mypy_cache/
+.mypy_cache/**
+.ruff_cache/
+.ruff_cache/**
+
+# Docs build output
+docs/site/
+docs/site/**
+site/
+site/**
+
+# OS/editor
+.vscode/
+.vscode/**
+.DS_Store
+
+# Git
+.git/
+.git/**
