@@ -7,7 +7,7 @@ like:
 
 Where you instead should add your answers. Any other changes may have unwanted consequences when your report is
 auto-generated at the end of the course. For questions where you are asked to include images, start by adding the image
-to the `figures` subfolder (please only use `.png`, `.jpg` or `.jpeg`) and then add the following code in your answer:
+to the `figures` subfolder (please only use `.png`, `.jpg` or `.jpeg`) and then add the following code in the response:
 
 `![my_image](figures/<image>.<extension>)`
 
@@ -121,20 +121,20 @@ will check the repositories and the code to verify your answers.
 ### Question 1
 > **Enter the group number you signed up on <learn.inside.dtu.dk>**
 >
-> Answer:
+Answer:
 
---- question 1 fill here ---
+22
 
 ### Question 2
 > **Enter the study number for each member in the group**
 >
 > Example:
 >
-> *sXXXXXX, sXXXXXX, sXXXXXX*
+> *sXXXXXX, sXXXXXX, ... *
 >
-> Answer:
+Answer:
 
---- question 2 fill here ---
+s201920, s214458, s221336, s250702 , s194504
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -146,9 +146,9 @@ will check the repositories and the code to verify your answers.
 > *We used the third-party framework ... in our project. We used functionality ... and functionality ... from the*
 > *package to do ... and ... in our project*.
 >
-> Answer:
+Answer:
 
---- question 3 fill here ---
+We didn't end up using any third-party frameworks, apart from `kagglehub`, this was used in `data.py` to automatically download our data rather than manually downloading it, which contributes to reproducibility.
 
 ## Coding environment
 
@@ -166,9 +166,18 @@ will check the repositories and the code to verify your answers.
 > *We used ... for managing our dependencies. The list of dependencies was auto-generated using ... . To get a*
 > *complete copy of our development environment, one would have to run the following commands*
 >
-> Answer:
+Answer:
 
---- question 4 fill here ---
+We used `uv` for managing our dependencies. All dependencies are specified in `pyproject.toml`, separated into main dependencies and optional development dependencies, that is not needed to run the model in production. 
+
+We have generated the `requirements.txt` file was using `uv pip compile pyproject.toml` as this was part of a task in the list. 
+
+To get an exact copy of our environment, a new team member would need to:
+
+1. Install `uv`
+2. Clone the repository
+3. Run `uv sync` to install all dependencies and create a locked virtual environment from our pyproject.toml file while updating `uv.lock`. The lock file guarantees that the same package versions are used everywhere, preventing "works on my machine" issues.
+4. Now just use `uv run <command>` to execute things in the environment.
 
 ### Question 5
 
@@ -182,9 +191,15 @@ will check the repositories and the code to verify your answers.
 > *because we did not use any ... in our project. We have added an ... folder that contains ... for running our*
 > *experiments.*
 >
-> Answer:
+Answer:
 
---- question 5 fill here ---
+From the cookiecutter template we have kept and filled out the core layout: `data/`,`dockerfiles/`, `reports/` `models/`, `notebooks/`, `reports/`, `src/`, `tests/`. 
+
+We are ignoring `data/`,`models/` and `wandb/` to keep large or generated artifacts out of Git. We instead track data/model versions via DVC or W&B instead of source control. The `wandb/` directory contains a folder with reports for each run, and is ignored as the records live in the W&B cloud project.
+
+We removed `notebooks/` directory, as we did not use it and `docs/` for the MkDocs site as we did not implement the extra S10 exercises to our project.
+
+Deviations from the vanilla template: added `configs/` for sweep settings for W&B sweeps.
 
 ### Question 6
 
@@ -197,7 +212,7 @@ will check the repositories and the code to verify your answers.
 > *We used ... for linting and ... for formatting. We also used ... for typing and ... for documentation. These*
 > *concepts are important in larger projects because ... . For example, typing ...*
 >
-> Answer:
+Answer:
 
 --- question 6 fill here ---
 
@@ -216,7 +231,7 @@ will check the repositories and the code to verify your answers.
 > *In total we have implemented X tests. Primarily we are testing ... and ... as these the most critical parts of our*
 > *application but also ... .*
 >
-> Answer:
+Answer:
 
 --- question 7 fill here ---
 
@@ -231,7 +246,7 @@ will check the repositories and the code to verify your answers.
 > *The total code coverage of code is X%, which includes all our source code. We are far from 100% coverage of our **
 > *code and even if we were then...*
 >
-> Answer:
+Answer:
 
 --- question 8 fill here ---
 
@@ -246,7 +261,7 @@ will check the repositories and the code to verify your answers.
 > *We made use of both branches and PRs in our project. In our group, each member had an branch that they worked on in*
 > *addition to the main branch. To merge code we ...*
 >
-> Answer:
+Answer:
 
 --- question 9 fill here ---
 
@@ -261,7 +276,7 @@ will check the repositories and the code to verify your answers.
 > *We did make use of DVC in the following way: ... . In the end it helped us in ... for controlling ... part of our*
 > *pipeline*
 >
-> Answer:
+Answer:
 
 --- question 10 fill here ---
 
@@ -278,7 +293,7 @@ will check the repositories and the code to verify your answers.
 > *and one for running ... . In particular for our ..., we used ... .An example of a triggered workflow can be seen*
 > *here: <weblink>*
 >
-> Answer:
+Answer:
 
 --- question 11 fill here ---
 
@@ -297,7 +312,7 @@ will check the repositories and the code to verify your answers.
 > Example:
 > *We used a simple argparser, that worked in the following way: Python  my_script.py --lr 1e-3 --batch_size 25*
 >
-> Answer:
+Answer:
 
 --- question 12 fill here ---
 
@@ -312,7 +327,7 @@ will check the repositories and the code to verify your answers.
 > *We made use of config files. Whenever an experiment is run the following happens: ... . To reproduce an experiment*
 > *one would have to do ...*
 >
-> Answer:
+Answer:
 
 --- question 13 fill here ---
 
@@ -329,7 +344,7 @@ will check the repositories and the code to verify your answers.
 > *As seen in the first image when have tracked ... and ... which both inform us about ... in our experiments.*
 > *As seen in the second image we are also tracking ... and ...*
 >
-> Answer:
+Answer:
 
 --- question 14 fill here ---
 
@@ -344,7 +359,7 @@ will check the repositories and the code to verify your answers.
 > *For our project we developed several images: one for training, inference and deployment. For example to run the*
 > *training docker image: `docker run trainer:latest lr=1e-3 batch_size=64`. Link to docker file: <weblink>*
 >
-> Answer:
+Answer:
 
 --- question 15 fill here ---
 
@@ -359,7 +374,7 @@ will check the repositories and the code to verify your answers.
 > *Debugging method was dependent on group member. Some just used ... and others used ... . We did a single profiling*
 > *run of our main code at some point that showed ...*
 >
-> Answer:
+Answer:
 
 --- question 16 fill here ---
 
@@ -376,7 +391,7 @@ will check the repositories and the code to verify your answers.
 > Example:
 > *We used the following two services: Engine and Bucket. Engine is used for... and Bucket is used for...*
 >
-> Answer:
+Answer:
 
 --- question 17 fill here ---
 
@@ -391,7 +406,7 @@ will check the repositories and the code to verify your answers.
 > *We used the compute engine to run our ... . We used instances with the following hardware: ... and we started the*
 > *using a custom container: ...*
 >
-> Answer:
+Answer:
 
 --- question 18 fill here ---
 
@@ -400,7 +415,7 @@ will check the repositories and the code to verify your answers.
 > **Insert 1-2 images of your GCP bucket, such that we can see what data you have stored in it.**
 > **You can take inspiration from [this figure](figures/bucket.png).**
 >
-> Answer:
+Answer:
 
 --- question 19 fill here ---
 
@@ -409,7 +424,7 @@ will check the repositories and the code to verify your answers.
 > **Upload 1-2 images of your GCP artifact registry, such that we can see the different docker images that you have**
 > **stored. You can take inspiration from [this figure](figures/registry.png).**
 >
-> Answer:
+Answer:
 
 --- question 20 fill here ---
 
@@ -418,7 +433,7 @@ will check the repositories and the code to verify your answers.
 > **Upload 1-2 images of your GCP cloud build history, so we can see the history of the images that have been build in**
 > **your project. You can take inspiration from [this figure](figures/build.png).**
 >
-> Answer:
+Answer:
 
 --- question 21 fill here ---
 
@@ -433,7 +448,7 @@ will check the repositories and the code to verify your answers.
 > *We managed to train our model in the cloud using the Engine. We did this by ... . The reason we choose the Engine*
 > *was because ...*
 >
-> Answer:
+Answer:
 
 --- question 22 fill here ---
 
@@ -450,9 +465,10 @@ will check the repositories and the code to verify your answers.
 > *We did manage to write an API for our model. We used FastAPI to do this. We did this by ... . We also added ...*
 > *to the API to make it more ...*
 >
-> Answer:
+Answer:
 
---- question 23 fill here ---
+We built a `FastAPI` service in `api.py`. By default it pulls the W&B artifact (using `WANDB_API_KEY`) alias ai_vs_human_model:latest, so it loads whatever run we last aliased as latest. If we set WANDB_SWEEP_ID, the API will instead fetch the best model from that sweep using the configured metric (train/epoch_acc by default). The API auto-selects GPU/MPS/CPU, and creates a `/predict` endpoint for image uploads on a localhost. Incoming images are validated, resized to 224×224, passed through our classifier, and the response returns class (AI or human) plus the confidence.
+The app runs locally with `uv run uvicorn ai_vs_human.api:app --reload` or via the inference Dockerfile in `dockerfiles/api.dockerfile`. For offline use, the service can be pointed to a local artifact directory instead of pulling from W&B.
 
 ### Question 24
 
@@ -466,9 +482,11 @@ will check the repositories and the code to verify your answers.
 > *worked. Afterwards we deployed it in the cloud, using ... . To invoke the service an user would call*
 > *`curl -X POST -F "file=@file.json"<weburl>`*
 >
-> Answer:
+Answer:
 
---- question 24 fill here ---
+We containerized the FastAPI service with api.dockerfile and run it locally via `docker run -p 8000:8000 api:latest` after building. In GCP we used Cloud Build + Artifact Registry to build/push the image, then deployed to Cloud Run with the `WANDB_API_KEY` and artifact parameters as env vars. Invocation: `curl -X POST -F "file=@sample.jpg" https://<cloud-run-url>/predict` returns the class and confidence. For local dev, `uv run uvicorn ai_vs_human.api:app --host 0.0.0.0 --port 8000 --reload` works with a `.env` containing `WANDB_API_KEY`.
+
+#TODO - cloud
 
 ### Question 25
 
@@ -481,9 +499,13 @@ will check the repositories and the code to verify your answers.
 > *For unit testing we used ... and for load testing we used ... . The results of the load testing showed that ...*
 > *before the service crashed.*
 >
-> Answer:
+Answer:
 
---- question 25 fill here ---
+For unit testing we used FastAPI's TestClient with pytest in `test_api.py`. Tests cover the root, health, and prediction endpoints, error handling for edge cases (invalid files, model failures, corrupted images), response validation (status codes, JSON schema, prediction values), and image preprocessing. We used mocked models to test the API logic without requiring a trained model. This returns predictable tensor outputs, allowing us to test the API logic (preprocessing, response formatting, error handling) without loading an actual trained model from W&B, to make our tests faster and independent of external dependencies.
+
+For load testing we used `Locust` (tests/loadtests/locustfile.py) and ran headless via `uv run invoke load_test_locust --host http://localhost:8000 --users 50 --rate 5 --time 2m`, which produced `reports/load_test_report.html`. Under that load the service stayed stable with no errors and p95 latency around 300–400 ms locally.
+
+The app handled the load without crashing, we didn't test higher loads to find the breaking point.
 
 ### Question 26
 
@@ -496,9 +518,14 @@ will check the repositories and the code to verify your answers.
 > *We did not manage to implement monitoring. We would like to have monitoring implemented such that over time we could*
 > *measure ... and ... that would inform us about this ... behaviour of our application.*
 >
-> Answer:
+Answer:
 
---- question 26 fill here ---
+We added `Prometheus` metrics to the API, able to be accessed exposed at a `/metrics` endpoint, tracking request counts, latency, prediction counts, confidence histograms. 
+
+Locally we can scrape this with Prometheus or inspect via `curl`. In production, Cloud Monitoring (managed Prometheus) would scrape the `/metrics` endpoint in Cloud Run to set up alerts on elevated latency/error rates and track drift via confidence distributions. 
+
+We haven't wired a full external monitoring service yet, but the metrics are instrumented and ready for scraping and alerting to catch performance degradation or model drift over time. It would be smart to add Cloud run drift detection and automated alerts to compare current prediction confidence distributions to baselines to catch model degradation early. And get notified when latencu spikes or error rates increase. Without it, we are flying blind and will not know that the API degraded until users report problems.
+
 
 ## Overall discussion of project
 
@@ -515,7 +542,7 @@ will check the repositories and the code to verify your answers.
 > *Group member 1 used ..., Group member 2 used ..., in total ... credits was spend during development. The service*
 > *costing the most was ... due to ... . Working in the cloud was ...*
 >
-> Answer:
+Answer:
 
 --- question 27 fill here ---
 
@@ -531,7 +558,7 @@ will check the repositories and the code to verify your answers.
 > *We implemented a frontend for our API. We did this because we wanted to show the user ... . The frontend was*
 > *implemented using ...*
 >
-> Answer:
+Answer:
 
 --- question 28 fill here ---
 
@@ -548,7 +575,7 @@ will check the repositories and the code to verify your answers.
 > *The starting point of the diagram is our local setup, where we integrated ... and ... and ... into our code.*
 > *Whenever we commit code and push to GitHub, it auto triggers ... and ... . From there the diagram shows ...*
 >
-> Answer:
+Answer:
 
 --- question 29 fill here ---
 
@@ -562,7 +589,7 @@ will check the repositories and the code to verify your answers.
 > Example:
 > *The biggest challenges in the project was using ... tool to do ... . The reason for this was ...*
 >
-> Answer:
+Answer:
 
 --- question 30 fill here ---
 
@@ -580,6 +607,6 @@ will check the repositories and the code to verify your answers.
 > *Student sXXXXXX was in charge of training our models in the cloud and deploying them afterwards.*
 > *All members contributed to code by...*
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
-> Answer:
+Answer:
 
 --- question 31 fill here ---
