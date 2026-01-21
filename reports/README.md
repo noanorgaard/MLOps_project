@@ -122,10 +122,6 @@ will check the repositories and the code to verify your answers.
 > **Enter the group number you signed up on <learn.inside.dtu.dk>**
 >
 Answer:
-
-22
-
-### Question 2
 > **Enter the study number for each member in the group**
 >
 > Example:
@@ -250,7 +246,7 @@ We implemented 32 tests across multiple test suites. Our unit tests cover data l
 >
 Answer:
 
-Our current test coverage is 23% across the codebase. Major gaps are in API request/response paths, dataset preprocessing branches, drift monitoring code, and training/evaluation scripts, which currently sit at low or 0% coverage. Even with 100% coverage we would not assume the code is bug-free: coverage only shows lines executed, not that outputs or edge cases are correct. If a function or class has 100% test coverage it just means that the edge cases that are handled, have tests. It does not mean that all edge cases are handled. The easiest way to achieve 100% test coverage is to handle any edge cases at all (or not even write any code at all). High-value tests must assert behavior (outputs, error handling, performance thresholds) and include integration paths.
+--- question 8 fill here ---
 
 ### Question 9
 
@@ -343,17 +339,7 @@ We have also created a `sweep_config.yaml` that defines the sweep space and lets
 >
 Answer:
 
-We secure reproducibility through W&B, Git, DVC, and using `uv.lock`.
-
-Whenever an experiment runs, W&B logs the complete config, metrics, model checkpoints, and system info. DVC ensures the exact dataset version is used. The `uv.lock` file locks all dependencies to specific versions.
-
-To reproduce an experiment you should:
-- Clone the repository
-- `uv sync` to restore the exact Python environment from uv.lock
-- `dvc pull` to get the versioned dataset
-- Run `uv run invoke train` (or `wandb sweep` for a specific sweep run)
-
-W&B automatically captures the config, git commit hash, and all hyperparameters, so revisiting a past run shows exactly what parameters and data were used.
+--- question 13 fill here ---
 
 ### Question 14
 
@@ -417,7 +403,11 @@ Answer:
 >
 Answer:
 
---- question 17 fill here ---
+We used virtual machines for training of the model, and uploaded the resulting model to WandB.
+
+We used the artifact registry to store our docker images, that could then be run with Cloud run. This combination we used to deploy our inference api, and the resulting prediction was stored in a Bucket. We also used this combo for deploying our drift api, that read the predictions(created through the inference API) from the bucket. 
+
+Buckets was also used to store training data. 
 
 ### Question 18
 
@@ -432,7 +422,14 @@ Answer:
 >
 Answer:
 
---- question 18 fill here ---
+We used VM's for model training by running our training code inside a container as a managed custom
+training job.
+
+we used the VM type `n1-standard-4` (4 vCPUs and ~15 GB RAM). We did not manage to get GPU access, but luckily were a patient bunch. The model was pretty ass as a result of this
+The vm was used image classifier training runs and for logging artifacts/metrics to Weights & Biases. The container image
+was built in Cloud Build, stored in Artifact Registry, and then referenced from the job spec (see `config_cpu.yaml`).
+
+For deployment of our inference and drift API's we used Cloud Run, that does not specify the VM type as it runs it automatically by itself. 
 
 ### Question 19
 
@@ -452,7 +449,7 @@ Answer:
 >
 Answer:
 
---- question 20 fill here ---
+![alt text](image-3.png)-
 
 ### Question 21
 
@@ -460,8 +457,11 @@ Answer:
 > **your project. You can take inspiration from [this figure](figures/build.png).**
 >
 Answer:
+![alt text](image-1.png)
+![alt text](image-2.png)
 
---- question 21 fill here ---
+A common(fælles) project was used aswell personals (therefore the two images) 
+
 
 ### Question 22
 
@@ -476,7 +476,8 @@ Answer:
 >
 Answer:
 
---- question 22 fill here ---
+We trained the model in cloud using the engine. The training was done through the linux based Compute engine vitual machine. Here we ran our training script and made the data availeble by mounting the data it from the cloud storage(bucket) on which allowed us to train without altering the training code.
+
 
 ## Deployment
 
@@ -510,9 +511,9 @@ The app runs locally with `uv run uvicorn ai_vs_human.api:app --reload` or via t
 >
 Answer:
 
-We containerized the FastAPI service with api.dockerfile and run it locally via `docker run -p 8000:8000 api:latest` after building. In GCP we used Cloud Build + Artifact Registry to build/push the image, then deployed to Cloud Run with the `WANDB_API_KEY` and artifact parameters as env vars. Invocation: `curl -X POST -F "file=@sample.jpg" https://<cloud-run-url>/predict` returns the class and confidence. For local dev, `uv run uvicorn ai_vs_human.api:app --host 0.0.0.0 --port 8000 --reload` works with a `.env` containing `WANDB_API_KEY`.
+We containerized the FastAPI service with api.dockerfile and run it locally via `docker run -p 8000:8000 api:latest` after building. In GCP we used Cloud Build + Artifact Registry to build/push the image, then deployed to Cloud Run with the `WANDB_API_KEY` and artifact parameters as env vars. Invocation: `curl -X POST -F "file=@sample.jpg" https://ai-vs-human-api-onyhgpfxqq-ew.a.run.app/predict` returns the class and confidence. For local dev, `uv run uvicorn ai_vs_human.api:app --host 0.0.0.0 --port 8000 --reload` works with a `.env` containing `WANDB_API_KEY`.
 
-#TODO - cloud
+
 
 ### Question 25
 
